@@ -34,7 +34,7 @@ const params = new URLSearchParams(url.search);
 // Check if the key exists and has a non-empty value
 if (authToken !== null && authToken !== '' && authToken !== 'null') {
     // User is Authenticated
-    console.log("The 'mpp-widgets_AuthToken' key is present and has a value:", authToken);
+    console.log("The 'mpp-widgets_AuthToken' key is present and has a value");
 } 
 else if (params.has('mpCustomWidgetAuth'))
 {
@@ -49,17 +49,17 @@ else {
     window.location.href = ssoUrl;                
 }
 
-// Create a random Nonce string for OAuth Processing
+// Create a random Nonce string for OAuth processing
 function generateNonce(length = 16) {
     const array = new Uint8Array(length);
     window.crypto.getRandomValues(array);
     return Array.from(array, (byte) => byte.toString(16).padStart(2, '0')).join('');
 }
 
-// Create the StateUrl for redirecting after SSO Authentication
+// Create the StateUrl for redirecting after SSO authentication
 function createStateUrl()
 {
-    // Get the Current URL
+    // Get the current URL
     const currentUrl = window.location.href;
 
     // Create a URL object
@@ -78,10 +78,10 @@ function createStateUrl()
     }
     else
     {
-        // Non-Query String Version
+        // Non-existing query string params version
         stateUrl += `?mpCustomWidgetAuth=true`;
     }
 
-    // Return the string URL Encoded
+    // Return the string URL encoded
     return encodeURIComponent(stateUrl);
 }

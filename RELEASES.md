@@ -3,7 +3,47 @@
 Below you can find the release history of MP Custom Widgets Core code. Please
 
 ## Release History
-
+- 2025.06.18
+  - Added JSON Stored Procedure Support
+  - Added Group Management Demo Widget using JSON
+  - Updated LiquidJS to 10.21.1
+  - Updated all support packages to latest versions
+- 2025.04.24
+  - Added Platform Sermon Player Widget
+- 20204.11.22
+  - Updated LiquidJS to 10.17.0
+  - Added Element Level Event Dispatcher
+  - Updated CDN (v1.1) to new build
+  - Sky API Updated
+    - NodaTime / ICAL Package Updates
+    - General Package Updates
+    - Minor Events API Updates adding some new features for rooms
+- 2024.10.11.1 (v1.1)
+  - Updated Core Javascript to pass elementId into template data for new re-use possibilities
+    - New CDN Version will be: https://mpweb.azureedge.net/cdn/customWidgetV1.js
+    - Version change in CDN is prevent any production breaks for existing widgets
+  - BREAKING CHANGE
+    - This build of Custom Widget JS changes the data structure returned to the widgetLoaded event.  Details is now an object
+    and not just the ID of the widget element.  This was unavoidalbe to pass the data element through the event.  Please 
+    consider this before changing to this version of the file.
+  - Updated Core Javascript to pass data into widgetLoaded event
+  - Added ChartJS Examples
+    - Makes use of elementId in template data to create dynamic templates
+    - Makes use of data passed to widgetLoaded event to dynaimcally create charts within the template
+- 2024.10.10.1
+  - Added Custom Widget JS Source Code in /src
+  - Updated API Service to return proper error messages
+  - Updated LiquidJS to 10.17.0
+    - This adds new exciting features. Read more in the [liquidJS release notes](https://github.com/harttle/liquidjs/blob/master/CHANGELOG.md)  
+- 2024.08.25.1
+  - Updated all packages and dependencies
+  - Restructed dist output folder to separate js from css in preparation for customCSS
+  - Added Version Banner to CustomWidgets.js
+- 2024.08.24.1
+  - Added authenticated:true|false to widget data based on login status
+  - Added new optional parameter 'data-authOverride' which disables the automatic red alert when no user is authenticated.  If this is used with authenticated parameter in the widget data object, custom unauthenticated ui can be created in the template.  *NOTE - this requires additional work to properly check for DataSet existence before using datasets.  Please review new example called 'customAuth' for demo and details.
+  - Updated Widget Template for easier cloning
+  - Updated Cloud Version of customWidget.js  
 - 2024.08.21.1
   - Added forceLogin.js script
   - Updated MyMissionTrips Demo to make use of the forceLogin.js script
