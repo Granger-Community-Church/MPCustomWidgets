@@ -3,6 +3,11 @@
 Below you can find the release history of MP Custom Widgets Core code. Please
 
 ## Release History
+- 2025.07.11
+  - Updated Widgets to have Custom CSS and JS (No More Bootstrap Requirement)
+- 2025.07.10
+  - Minor Update for Error Logging for JSON Parsing
+  - Added Family Sacraments Example Widget
 - 2025.06.18
   - Added JSON Stored Procedure Support
   - Added Group Management Demo Widget using JSON
