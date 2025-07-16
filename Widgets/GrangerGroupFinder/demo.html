@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Custom Widget Demo</title>
+    <link href="/src/css/mp-custom.css" rel="stylesheet">
+    
+    <!-- Custom Style Sheets Used in this Example -->
+    <link href="Assets/Ribbon.css" rel="stylesheet" />
+    <link href="Assets/CustomGroups.css" rel="stylesheet" />
+
+    </head>
+    
+    <body>
+        <div class="mp-container">
+
+            <h2>Custom Group Finder</h2>
+
+            <!-- This example makes use of dynamic Tag injection -->
+            <!-- The actual Custom Widget Tag is created and injected by Javascript so that you can search / filter -->
+            <div id="groupTag"></div>
+
+        </div>   
+        
+
+
+        <script type="text/javascript">
+            var tag = `
+            <div id="CustomGroupsWidget" 
+                data-component="CustomWidget" 
+                data-sp="api_custom_GroupWidget" 
+                data-params="{params}" 
+                data-template="/Widgets/GrangerGroupFinder/Template/GroupFinder.html" 
+                data-requireUser="false" 
+                data-cache="false" 
+                data-debug="true" 
+                data-host="grangerchurch"></div>`;
+
+            var sessionData = '';
+            var groupTag = document.getElementById("groupTag");
+            groupTag.innerHTML = tag.replace('{params}', '');
+
+            function executeSearch() {
+                //unbind Event Listeners
+                unbindListeners();
+
+                var tempParams = '';
+                sessionData = '';
+                   
+                var ddlCongregation = document.getElementById('ddlCongregation');
+
+                if (ddlCongregation && ddlCongregation.value && ddlCongregation.value !== '')
+                {
+                    tempParams += `@CongregationID=${ddlCongregation.value}`;
+                    sessionData += `ddlCongregation=${ddlCongregation.value}&`;
+                }     
+
+                var keywordSearch = document.getElementById('txtKeyword');
+
+                if (keywordSearch.value !== null && keywordSearch.value !== '')
+                {
+                    tempParams += `@Keyword=${keywordSearch.value}`;
+                    sessionData += `txtKeyword=${keywordSearch.value}&`;
+                }     
+
+                groupTag.innerHTML = tag.replace('{params}', tempParams);
+                window.ReInitWidget('CustomGroupsWidget');
+            }
+
+            function unbindListeners() {
+
+                    // Get TriggerElements
+                    var triggerElements = document.getElementsByClassName('group-select');
+
+                    // Remove Change Events to all Group-Select Class Elements
+                    for (var i = 0; i < triggerElements.length; i++) {
+                        triggerElements[i].removeEventListener('change', function() {
+                            executeSearch();
+                        });
+                    };
+
+                    // Remove Enter / Return Listener
+                    document.removeEventListener('keyup', function (e) {
+                        if (e.key === 'Enter' || e.keyCode === 13) {
+                            executeSearch();   
+                        }
+                    });                
+
+                    // Get Tag Click Elements
+                    var tagElements = document.querySelectorAll('[data-tag="true"]');
+
+                    // Remove Click Events for all Tags
+                    for (var i = 0; i < tagElements.length; i++) {
+                        tagElements[i].removeEventListener('click', tagClickEvent);
+                    };
+            }
+
+            window.addEventListener('widgetLoaded', function(event) {
+                console.log('|||===> widgetLoaded Event Fired for: ' + event.detail.widgetId);       
+                
+                if (event.detail.widgetId == 'CustomGroupsWidget')
+                {
+                    //Process Post Widget Loaded Events
+                    // Use Session Values Post Re-Render
+                    var sessionVars = sessionData.split('&');
+
+                    // Add Change Events to all Group-Select Class Elements
+                    for (var i = 0; i < sessionVars.length; i++) {
+
+                        if (sessionVars[i].indexOf('=') > -1)
+                        {
+                            var elementParams = sessionVars[i].split('=');
+
+                            var elementToUpdate = document.getElementById(elementParams[0].trim());
+                            elementToUpdate.value = elementParams[1].trim();
+                        }
+                        
+                    };
+
+                    // Add Change Handler
+                    var triggerElements = document.getElementsByClassName('group-select');
+
+                    // Add Change Events to all Group-Select Class Elements
+                    for (var i = 0; i < triggerElements.length; i++) {
+                        triggerElements[i].addEventListener('change', function() {
+                            executeSearch();
+                        });
+                    };
+
+                    // Add Search Handlers
+                    var btnElement = document.getElementById("btnKeyword");
+                    btnElement.addEventListener('click', function() {
+                        executeSearch();                        
+                    });
+
+                    // Add Enter / Return Listener
+                    // This might conflict with other widgets on the page
+                    document.addEventListener('keyup', function (e) {
+                        if (e.key === 'Enter' || e.keyCode === 13) {
+                            executeSearch();   
+                        }
+                    });
+
+                    // Get Tag Click Elements
+                    var tagElements = document.querySelectorAll('[data-tag="true"]');
+
+                    // Add Click Events for all Tags
+                    for (var i = 0; i < tagElements.length; i++) {
+                        tagElements[i].addEventListener('click', tagClickEvent);
+                    };
+                }
+
+            });
+
+            function tagClickEvent() {
+                var keywordSearch = document.getElementById('txtKeyword');
+                keywordSearch.value = this.getAttribute('data-id');
+
+                executeSearch();
+            }
+        </script>
+        
+        <script type="text/javascript" src="/dist/js/customWidgetV1.js"></script>
+
+
+    </body>
+</html>

@@ -1,0 +1,58 @@
+.custom--groupCard--img {
+    height: 160px;
+    object-fit: cover;
+    width: 100%;
+}
+
+.custom--groupCard--description {
+    max-height: 197px;
+    overflow: hidden;
+}
+
+.custom--groupCard--img--container {
+    background-color: gray;
+    text-align: center;
+}
+
+/* Base font for widget */
+body, .mp-container {
+    font-family: "Poppins", Helvetica, Arial, sans-serif;
+}
+
+/* Group title: bold and all-caps */
+.mp-card-title {
+    font-weight: bold;
+    letter-spacing: 0.04em;
+}
+
+/* Tag badge: black background, white text */
+.tag-badge {
+    background-color: #e0e0e0;
+    color: #333;
+    border-radius: 3px;
+    padding: 6px 18px;
+    font-size: 0.9em;
+    margin: 2px;
+    display: inline-block;
+}
+
+
+
+/* See Details button: no border, solid #333, Granger green text */
+.see-details-btn {
+    background-color: #333 !important;
+    color: #a8d424 !important;
+    border: none !important;
+    padding: 8px 20px;
+    border-radius: 3px;
+    font-weight: bold;
+    text-transform: uppercase;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s;
+    display: inline-block;
+}
+.see-details-btn:hover, .see-details-btn:focus {
+    background-color: #222 !important;
+    color: #d4f424 !important;
+    text-decoration: none;
+}

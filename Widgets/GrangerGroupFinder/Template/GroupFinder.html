@@ -1,0 +1,155 @@
+<div class="mp-row">
+  <div class="mp-offset-md-3 mp-col-md-6">
+    <div>
+      <div>
+        <label>Campus</label>
+      </div>
+      <select id="ddlCongregation" class="mp-form-select group-select">
+        <option value="">-- All Campuses --</option>
+        {% for element in DataSet4 %}
+          <option value="{{element.Congregation_ID}}">{{element.Congregation_Name}}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div>
+      <div>
+        <label>Keyword Search</label>
+      </div>
+      <div class="mp-row">
+        <div class="mp-col-10">
+          <input type="search" id="txtKeyword" class="mp-form-control" placeholder="Keyword Search">      
+        </div>
+        <div class="mp-col-2">
+          <button type="button" id="btnKeyword" class="mp-btn mp-btn-outline-success">Search</button>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+
+
+
+<head>
+  <link href="https://fonts.googleapis.com/css?family=Poppins:400,600&display=swap" rel="stylesheet">
+</head>
+
+<div class="mp-mt-3">
+  <h3>{{DataSet1.length}} Groups Found</h3>
+</div>
+
+
+<div class="mp-row mp-mt-3">
+{% for element in DataSet1 %}
+
+
+<div class="mp-col-xs-12 mp-col-sm-6 mp-col-md-4 mp-col-lg-4 mp-mb-3">
+  <!-- Card -->
+  <div class="mp-card mp-h-100 mp-shadow">
+
+    <!--Card image-->
+    <div class="view overlay custom--groupCard--img--container">
+
+      {% if element.ImageGUID %}
+        <img class="custom--groupCard--img" src="https://my.grangerchurch.com/ministryplatformapi/files/{{element.ImageGUID}}" alt="Group Image">
+      {% else %}
+        <img class="mpp-card--image" src="https://my.grangerchurch.com/widgets/Content/icons/icon-group.svg" style="margin:40px;height:80px;width:80px;">
+      {% endif %}
+
+      <a href="#!">
+        <div class="mask rgba-white-slight"></div>
+      </a>
+    </div>
+
+    <div class="mp-card-body mp-d-flex mp-flex-column">
+
+      {% if element.Future_Start %}
+        <div class="ribbon ribbon-top-right"><span>New</span></div>
+      {% endif %}      
+
+      <h4 class="mp-card-title">{{element.Group_Name}}</h4>
+
+      {% if element.Location %}
+        <h6>{{element.Location}}</h6>
+      {% endif %}
+
+      {% if element.Meeting_Day %}
+        <div><strong>{{element.Meeting_Day}}s 
+          
+          {% if element.Meeting_Time %}
+            {{element.Meeting_Time | date: '@ %l:%M %P',0}}
+          {% endif %}
+          
+          </strong></div>
+      {% endif %}
+
+      {% if element.Target_Size and element.CurrentParticipantsCount >= element.Target_Size %}
+        <div><strong>Full</strong></div>
+      {% endif %}
+
+
+      <div class="mp-card-text custom--groupCard--description mp-mb-2">{{element.Description}}</div>
+      
+     
+      {% if element.Future_Start %}
+        <div class="mp-mt-1 mp-mb-2 mp-text-center"><strong>First meeting: {{element.Start_Date | date: '%B %-d, %Y', 0}}</strong></div>
+      {% endif %}
+
+      <div class="mp-text-center mp-mt-auto">
+
+        {% if element.Group_Focus %}
+          <span class="mp-badge tag-badge" data-id="{{element.Group_Focus}}" data-tag="true">
+            {{element.Group_Focus}}
+          </span>
+        {% endif %}
+
+        {% if element.Meeting_Day %}
+          <span class="mp-badge tag-badge" data-id="{{element.Meeting_Day}}" data-tag="true">
+            {{element.Meeting_Day}}
+          </span>
+        {% endif %}
+
+        {% if element.Life_Stage %}
+          <span class="mp-badge tag-badge" data-id="{{element.Life_Stage}}" data-tag="true">
+            {{element.Life_Stage}}
+          </span>
+        {% endif %}
+
+        {% if element.Ministry_Name %}
+        <span class="mp-badge tag-badge" data-id="{{element.Ministry_Name}}" data-tag="true">
+          {{element.Ministry_Name}}
+        </span>
+        {% endif %}
+
+        {% if element.Meeting_Duration_ID %}
+        <span class="mp-badge tag-badge" data-id="{{element.Meeting_Duration}}" data-tag="true">
+          {{element.Meeting_Duration}}
+        </span>
+        {% endif %}
+
+
+        {% assign tagElements = element.Tags | split: ", " %}
+
+        {% for t in tagElements %}
+          <span class="mp-badge tag-badge" data-id="{{t}}" data-tag="true">{{t}}</span>
+        {% endfor %}
+
+
+        <div class="mp-text-center mp-mt-4 mp-mb-2">
+          <a href="#?groupId={{element.Group_ID}}" class="see-details-btn">See Details</a>
+        </div>        
+      </div>
+  
+
+
+    </div>
+
+  </div>
+
+</div>
+
+
+{% endfor %}
+</div>
