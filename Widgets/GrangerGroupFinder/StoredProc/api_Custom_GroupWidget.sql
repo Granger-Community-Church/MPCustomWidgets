@@ -42,6 +42,7 @@ BEGIN
 
 --Create Temp Table
 SELECT G.Group_Name
+,G.Group_ID
 ,G.Description
 ,G.Congregation_ID
 ,G.Start_Date

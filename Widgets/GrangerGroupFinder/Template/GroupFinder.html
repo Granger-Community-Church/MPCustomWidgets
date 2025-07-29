@@ -1,30 +1,37 @@
-<div class="mp-row">
-  <div class="mp-offset-md-3 mp-col-md-6">
-    <div>
-      <div>
-        <label>Campus</label>
-      </div>
-      <select id="ddlCongregation" class="mp-form-select group-select">
-        <option value="">-- All Campuses --</option>
-        {% for element in DataSet4 %}
-          <option value="{{element.Congregation_ID}}">{{element.Congregation_Name}}</option>
-        {% endfor %}
-      </select>
-    </div>
+<div class="search-filters">
+  <div class="filter-group">
+    <label for="ddlCongregation" class="filter-label">Campus</label>
+    <select id="ddlCongregation" class="filter-select">
+      <option value="">-- All Campuses --</option>
+      {% for element in DataSet4 %}
+        <option value="{{element.Congregation_ID}}">{{element.Congregation_Name}}</option>
+      {% endfor %}
+    </select>
+  </div>
 
-    <div>
-      <div>
-        <label>Keyword Search</label>
-      </div>
-      <div class="mp-row">
-        <div class="mp-col-10">
-          <input type="search" id="txtKeyword" class="mp-form-control" placeholder="Keyword Search">      
-        </div>
-        <div class="mp-col-2">
-          <button type="button" id="btnKeyword" class="mp-btn mp-btn-outline-success">Search</button>
-        </div>
-      </div>
-      
+  <div class="filter-group">
+    <label for="ddlDay" class="filter-label">Day</label>
+    <select id="ddlDay" class="filter-select">
+      <option value="">-- Any Day --</option>
+      <option value="Sunday">Sunday</option>
+      <option value="Monday">Monday</option>
+      <option value="Tuesday">Tuesday</option>
+      <option value="Wednesday">Wednesday</option>
+      <option value="Thursday">Thursday</option>
+      <option value="Friday">Friday</option>
+      <option value="Saturday">Saturday</option>
+    </select>
+  </div>
+
+  <div class="filter-group filter-search">
+    <label for="txtKeyword" class="sr-only">Keyword Search</label>
+    <div class="search-box">
+      <input type="search" id="txtKeyword" class="search-input" placeholder="Search groups...">
+      <button type="button" id="btnKeyword" class="search-button">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+        </svg>
+      </button>
     </div>
   </div>
 </div>
@@ -36,16 +43,14 @@
   <link href="https://fonts.googleapis.com/css?family=Poppins:400,600&display=swap" rel="stylesheet">
 </head>
 
-<div class="mp-mt-3">
-  <h3>{{DataSet1.length}} Groups Found</h3>
+<div class="group-count">
+  <h3 class="mp-mt-3">{{DataSet1.length}} Groups Found</h3>
 </div>
 
-
-<div class="mp-row mp-mt-3">
+<div class="group-finder-grid">
 {% for element in DataSet1 %}
 
-
-<div class="mp-col-xs-12 mp-col-sm-6 mp-col-md-4 mp-col-lg-4 mp-mb-3">
+<div class="group-card">
   <!-- Card -->
   <div class="mp-card mp-h-100 mp-shadow">
 
@@ -79,7 +84,14 @@
         <div><strong>{{element.Meeting_Day}}s 
           
           {% if element.Meeting_Time %}
-            {{element.Meeting_Time | date: '@ %l:%M %P',0}}
+            {% assign time_parts = element.Meeting_Time | date: '@ %-l:%M %p',0 | split: ' ' %}
+            {% assign time = time_parts[1] %}
+            {% assign period = time_parts[2] | downcase %}
+            {% if time contains ':00' %}
+              {{ time | remove: ':00' }} {{ period | replace:'am','a.m.' | replace:'pm','p.m.' }}
+            {% else %}
+              {{ time }} {{ period | replace:'am','a.m.' | replace:'pm','p.m.' }}
+            {% endif %}
           {% endif %}
           
           </strong></div>
@@ -138,7 +150,7 @@
 
 
         <div class="mp-text-center mp-mt-4 mp-mb-2">
-          <a href="#?groupId={{element.Group_ID}}" class="see-details-btn">See Details</a>
+          <a href="https://grangerchurch.com/groupdetails?id={{element.Group_ID}}" class="see-details-btn">See Details</a>
         </div>        
       </div>
   

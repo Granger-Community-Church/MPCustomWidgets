@@ -19,6 +19,195 @@ body, .mp-container {
     font-family: "Poppins", Helvetica, Arial, sans-serif;
 }
 
+/* Search and filter section */
+.search-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  align-items: flex-end;
+  max-width: 1200px;
+  margin: 0 auto 20px;
+  padding: 0 15px;
+}
+
+.filter-group {
+  flex: 1;
+  min-width: 200px;
+}
+
+.filter-search {
+  flex: 2;
+  max-width: 100%;
+}
+
+.filter-label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 600;
+  color: #333;
+  font-size: 0.9rem;
+}
+
+.filter-select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  background-color: white;
+  transition: border-color 0.2s;
+}
+
+.filter-select:focus {
+  border-color: #4CAF50;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
+.search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-input {
+  width: 100%;
+  padding: 8px 40px 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.search-input:focus {
+  border-color: #4CAF50;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+}
+
+.search-button {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 40px;
+  background: none;
+  border: none;
+  color: #4CAF50;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.search-button:hover {
+  color: #388E3C;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .search-filters {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .filter-group {
+    width: 100%;
+  }
+}
+
+/* Group count heading */
+.group-count {
+    max-width: 1800px;
+    margin: 0 auto 20px;
+    padding: 0 15px;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+/* Break out of container */
+#groupTag {
+    width: 100vw !important;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw !important;
+    margin-right: -50vw !important;
+    padding: 0 15px;
+    box-sizing: border-box;
+}
+
+#CustomGroupsWidget {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+}
+
+/* Reset container styles */
+#CustomGroupsWidget,
+#CustomGroupsWidget .mp-container,
+#CustomGroupsWidget ~ .mp-container {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 15px !important;
+    box-sizing: border-box;
+}
+
+/* Group finder grid layout */
+.group-finder-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 20px;
+    width: 100%;
+    max-width: 1800px;
+    margin: 0 auto;
+    padding: 0 15px;
+    box-sizing: border-box;
+}
+
+/* Group card styles */
+.group-card {
+    width: 100%;
+    height: 100%;
+}
+
+/* Reset default column styles */
+.group-finder-grid > [class*='mp-col-'] {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/* Ensure cards take full width of grid cell */
+.group-finder-grid .mp-card {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Card body should take remaining space */
+.mp-card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
 /* Group title: bold and all-caps */
 .mp-card-title {
     font-weight: bold;
@@ -38,21 +227,22 @@ body, .mp-container {
 
 
 
-/* See Details button: no border, solid #333, Granger green text */
+/* See Details button: no border, solid #555, Granger green text */
 .see-details-btn {
-    background-color: #333 !important;
+    background-color: #555 !important; /* Lighter gray background */
     color: #a8d424 !important;
     border: none !important;
-    padding: 8px 20px;
-    border-radius: 3px;
+    padding: 10px 22px; /* Slightly more padding for better proportions */
+    border-radius: 0; /* Square corners */
     font-weight: bold;
+    font-size: 0.95em; /* Slightly larger font */
     text-transform: uppercase;
     text-decoration: none;
     transition: background 0.2s, color 0.2s;
     display: inline-block;
 }
 .see-details-btn:hover, .see-details-btn:focus {
-    background-color: #222 !important;
+    background-color: #444 !important; /* Slightly darker on hover */
     color: #d4f424 !important;
     text-decoration: none;
 }
