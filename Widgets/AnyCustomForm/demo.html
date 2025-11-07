@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Any Form Custom Widget Demo</title>        
+    </head>
+    
+    <body>
+
+        <div id="customFormDropZone">
+        </div>  
+
+        <script>
+
+            // 1) Read ?form=... from the current URL
+            const params = new URLSearchParams(window.location.search);
+            const formGuid = params.get('form');
+
+            if (!formGuid) {
+                console.warn('No "form" querystring parameter found.');
+                formGuid = '1fa869c4-a248-4b80-a16b-3623fbd515e4'; // This is for DEMO purposes ONLY and should be removed in production.
+            }
+
+            // 2) Find the drop zone
+            const dropzone = document.getElementById('customFormDropZone');
+            if (!dropzone) {
+                console.error('Element with id "customFormDropZone" not found.');
+            }
+            else
+            {
+                // 3) SAFELY create and inject the custom element
+                // (DOM APIs avoid XSS issues vs. string innerHTML)
+                const customForm = document.createElement('mpp-custom-form');
+                customForm.setAttribute('formguid', formGuid);
+
+                // Optionally clear any previous content, then inject
+                dropzone.innerHTML = '';
+                dropzone.appendChild(customForm);  
+            }              
+        </script>
+        <script id="MPWidgets" src="https://mpi.ministryplatform.com/widgets/dist/MPWidgets.js"></script>
+    </body>
+</html>
