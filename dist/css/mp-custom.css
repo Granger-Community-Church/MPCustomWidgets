@@ -1338,3 +1338,13 @@ h6 { font-size: 1rem; }
   .mp-d-lg-block { display: block !important; }
   .mp-d-lg-none { display: none !important; }
 }
+
+.mp-person-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--mp-shadow-lg);
+  transition: all .25s ease;
+}
+
+.mp-person-card {
+  border-radius: 18px;
+}

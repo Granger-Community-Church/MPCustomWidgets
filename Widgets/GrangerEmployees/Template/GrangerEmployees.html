@@ -1,35 +1,78 @@
 <div class="mp-container mp-mt-4">
   <div class="mp-row">
+
     {%- for s in DataSet1 -%}
       <div class="mp-col-12 mp-col-md-6 mp-col-lg-4 mp-mb-3">
-        <article class="mp-card mp-shadow-sm mp-person-card">
-          <div class="mp-card-body">
-            <div class="mp-d-flex mp-align-items-center mp-mb-2">
-              {%- if s.Image_GUID and s.Image_GUID != '' -%}
-                <img 
-                  class="mp-avatar mp-avatar-img mp-me-2" 
-                  src="{{ s.File_URL }}{{ s.Image_GUID }}" 
-                  alt="{{ s.Nickname }} {{ s.Last_Name }} headshot" 
-                  width="64" height="64"
-                  loading="lazy">
-              {%- else -%}
-                {%- assign n_init = s.Nickname | slice: 0, 1 | upcase -%}
-                {%- assign l_init = s.Last_Name | slice: 0, 1 | upcase -%}
-                <div class="mp-avatar mp-avatar-initial mp-me-2" aria-hidden="true">{{ n_init }}{{ l_init }}</div>
-              {%- endif -%}
-              <div>
-                <h3 class="mp-card-title mp-mb-1 mp-m-0">{{ s.Nickname }} {{ s.Last_Name }}</h3>
-                <div class="mp-text-muted mp-small">{{ s.Job_Title }}</div>
-              </div>
-            </div>
 
-            {%- comment -%}
-              Optional: Add badges, contact buttons, or metadata here
-              <span class="mp-badge mp-badge-primary">Staff</span>
-            {%- endcomment -%}
+        <article 
+          class="mp-card mp-shadow-sm mp-person-card mp-p-3" 
+          style="
+            text-align:center; 
+            display:flex; 
+            flex-direction:column; 
+            justify-content:flex-start; 
+            height:100%;
+          "
+        >
+
+          {%- comment -%} Portrait Photo / Placeholder {%- endcomment -%}
+          <div 
+            class="mp-mb-3"
+            style="
+              width:100%;
+              max-width:240px;
+              aspect-ratio:3/4;
+              margin:0 auto;
+              overflow:hidden;
+              border-radius:12px;
+              display:flex;
+              align-items:center;
+              justify-content:center;
+              background:#e9ecef;
+            "
+          >
+            {%- if s.Image_GUID and s.Image_GUID != '' -%}
+              <img 
+                src="{{ s.File_URL }}{{ s.Image_GUID }}" 
+                alt="{{ s.Nickname }} {{ s.Last_Name }} headshot"
+                loading="lazy"
+                style="
+                  width:100%;
+                  height:100%;
+                  object-fit:cover;
+                ">
+            {%- else -%}
+              {%- assign n_init = s.Nickname | slice: 0, 1 | upcase -%}
+              {%- assign l_init = s.Last_Name | slice: 0, 1 | upcase -%}
+              <div 
+                class="mp-avatar-initial mp-text-light"
+                style="
+                  width:100%;
+                  height:100%;
+                  display:flex;
+                  align-items:center;
+                  justify-content:center;
+                  font-size:2.5rem;
+                  background:#6c757d;
+                ">
+                {{ n_init }}{{ l_init }}
+              </div>
+            {%- endif -%}
           </div>
+
+          <div style="flex-grow:1;">
+            <h3 class="mp-card-title mp-mb-1 mp-m-0" style="font-size:1.25rem;">
+              {{ s.Nickname }} {{ s.Last_Name }}
+            </h3>
+            <div class="mp-text-muted mp-small">
+              {{ s.Job_Title }}
+            </div>
+          </div>
+
         </article>
+
       </div>
     {%- endfor -%}
+
   </div>
 </div>
