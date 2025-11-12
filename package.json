@@ -1,13 +1,15 @@
 {
   "name": "customwidgetjs",
-  "version": "2025.10.15.1",
+  "version": "2025.11.12.1",
   "description": "MinistryPlatform Custom Widgets - used for church custom widgets within the MP ecosystem.",
   "main": "index.js",
   "scripts": {
     "dev": "webpack --watch --mode=development",
     "prod": "webpack --mode=production",
     "build": "webpack --mode=production",
-    "create-widget": "tsx cli/create-widget.ts"
+    "create-widget": "npx tsx cli/create-widget.ts",
+    "cdn-url": "npx tsx cli/get-cdn-url.ts",
+    "make-cloud-widget": "npx tsx cli/make-cloud-widget.ts"
   },
   "keywords": [],
   "author": "",

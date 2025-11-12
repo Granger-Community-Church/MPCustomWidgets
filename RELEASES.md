@@ -3,6 +3,11 @@
 Below you can find the release history of MP Custom Widgets Core code. Please
 
 ## Release History
+- 2025.11.12
+  - Added additional CLI for creating cloud versions of widgets automatically
+  - Added new data-templateUrl option to load template from a URL
+  - Updated Liquid to 10.24.0
+  - Updated all support packages to latest versions
 - 2025.10.15
   - Added CLI and updated the widget template
   - All packages brought up to date
