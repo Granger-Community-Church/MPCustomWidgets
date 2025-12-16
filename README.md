@@ -165,6 +165,33 @@ data-host="mpi"
 
   
 
+### data-templateUrl="https://..."
+
+- Load a Liquid template from a remote HTTPS URL
+- **Security Requirements:**
+  - Must be a valid HTTPS URL (HTTP not allowed)
+  - URL must be from an approved domain in the allowlist
+  - Template size limited to 200KB
+  - Templates are cached in-memory for the duration of the page session
+  - Templates cannot contain `{% include %}`, `{% render %}`, or `{% layout %}` tags for security
+- **CORS Requirements:** The remote server must set proper `Access-Control-Allow-Origin` headers to allow your domain to fetch the template
+- **Default Allowlist Domains:**
+  - `cdn.jsdelivr.net`
+  - `*.github.io`
+  - `raw.githubusercontent.com`
+- **Customizing the Allowlist:** To add your own trusted domains, modify the `TEMPLATE_URL_ALLOWLIST` array in [WidgetModule.js](src/Modules/WidgetModule.js)
+
+Example:
+```html
+<div
+  id="MyWidget"
+  data-component="CustomWidget"
+  data-sp="api_Custom_GetData"
+  data-templateUrl="https://cdn.jsdelivr.net/gh/myorg/templates@main/widget.html"
+  data-host="mpi"
+></div>
+```
+
 ### data-sp="api_Custom_StoredProcedure"
 
   
@@ -277,7 +304,12 @@ You can build Stored Procedures in SQL Server that will return JSON data.  As of
 
 -  **Note** - data-template does **NOT** support relative paths. If you just use the template name (mytemplatename.html) or even (./mytemplatename.html) you will see a 404 error when custom widgets tries to load the template. You **need** to either use the full _URL_ (https://www.whatever.com/templates/mytemplate.html) or a full relative path (/templates/mytemplate.html)
 
-- You **_must_** specify a data-template or data-templateId for each custom widget
+- You **_must_** specify a data-template, data-templateId, or data-templateUrl for each custom widget
+
+**Template Priority Order:** Templates are evaluated in this order. The first one found will be used:
+1. `data-templateId` - Inline template from DOM element
+2. `data-template` - Local file path template
+3. `data-templateUrl` - Remote HTTPS URL template
 
   
 
