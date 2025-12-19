@@ -1348,3 +1348,60 @@ h6 { font-size: 1rem; }
 .mp-person-card {
   border-radius: 18px;
 }
+
+/* Event cards: landscape image + text beneath */
+.mp-event-card{
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 12px; /* matches your existing card vibe */
+}
+
+/* Fixed horizontal image frame */
+.mp-event-media{
+  width: 100%;
+  aspect-ratio: 16 / 9;   /* landscape */
+  background: var(--mp-bg-light);
+  overflow: hidden;
+}
+
+/* Crop any image to fit nicely */
+.mp-event-media-img{
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Fallback when no image */
+.mp-event-media-fallback{
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--mp-text-muted);
+  font-size: var(--mp-font-size-sm);
+}
+
+/* Text area */
+.mp-event-body{
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+/* Keep meta aligned toward bottom for consistency */
+.mp-event-meta{
+  margin-top: auto;
+}
+
+/* Title style (optional) */
+.mp-event-title{
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--mp-text-primary);
+}

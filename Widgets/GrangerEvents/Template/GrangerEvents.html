@@ -1,4 +1,42 @@
-<div>
-  <h1>Your Template Here</h1>
-</div>
+<div class="mp-container mp-mt-4">
+  <div class="mp-row">
 
+    {%- for e in DataSet1 -%}
+      <div class="mp-col-12 mp-col-md-6 mp-col-lg-4 mp-mb-3">
+
+        <article class="mp-card mp-shadow-sm mp-event-card">
+
+          <div class="mp-event-media">
+            {%- if e.Image_URL and e.Image_URL != '' -%}
+              <img
+                class="mp-event-media-img"
+                src="{{ e.Image_URL }}"
+                alt="{{ e.Title | escape }}"
+                loading="lazy">
+            {%- else -%}
+              <div class="mp-event-media-fallback" aria-hidden="true">
+                No image
+              </div>
+            {%- endif -%}
+          </div>
+
+          <div class="mp-event-body">
+            <h3 class="mp-event-title mp-mb-1">{{ e.Title }}</h3>
+
+            {%- if e.Subtitle and e.Subtitle != '' -%}
+              <div class="mp-text-muted mp-small mp-mb-2">{{ e.Subtitle }}</div>
+            {%- endif -%}
+
+            <div class="mp-event-meta mp-small mp-text-muted">
+              {%- if e.Start and e.Start != '' -%}<span>{{ e.Start }}</span>{%- endif -%}
+              {%- if e.Location and e.Location != '' -%}<span> • {{ e.Location }}</span>{%- endif -%}
+            </div>
+          </div>
+
+        </article>
+
+      </div>
+    {%- endfor -%}
+
+  </div>
+</div>
