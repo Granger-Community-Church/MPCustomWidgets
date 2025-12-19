@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Custom Widget Demo</title>
+    <link href="https://cdn.jsdelivr.net/gh/Granger-Community-Church/MPCustomWidgets@main/dist/css/mp-custom.css" rel="stylesheet">
+    </head>
+    
+    <body>
+        <div class="container">
+
+            <h2>GrangerEvents</h2>
+            <p>Widget Cloned by create-widget</p>
+            <div id="GrangerEvents" 
+                data-component="CustomWidget" 
+                data-sp="api_Custom_GetRegistrationEvents" 
+                data-template="/Widgets/GrangerEvents/Template/GrangerEvents.html" 
+                data-requireUser="false" 
+                data-cache="true"
+                data-debug="true"
+                data-host="grangerchurch"></div>
+
+        </div>            
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/Granger-Community-Church/MPCustomWidgets@main/dist/js/customWidgetV1.js"></script>
+    </body>
+</html>
