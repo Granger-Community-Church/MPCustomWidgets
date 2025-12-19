@@ -1,42 +1,45 @@
 <div class="mp-container mp-mt-4">
   <div class="mp-row">
-
     {%- for e in DataSet1 -%}
+      {%- assign detail_url = "https://grangerchurch.com/event-detail?id=" | append: e.Event_ID -%}
+      {%- assign has_img = e.Image_GUID and e.Image_GUID != "" -%}
+      {%- assign img_url = e.File_URL | append: e.Image_GUID -%}
+
       <div class="mp-col-12 mp-col-md-6 mp-col-lg-4 mp-mb-3">
-
-        <article class="mp-card mp-shadow-sm mp-event-card">
-
-          <div class="mp-event-media">
-            {%- if e.Image_URL and e.Image_URL != '' -%}
-              <img
-                class="mp-event-media-img"
-                src="{{ e.Image_URL }}"
-                alt="{{ e.Title | escape }}"
-                loading="lazy">
-            {%- else -%}
-              <div class="mp-event-media-fallback" aria-hidden="true">
-                No image
-              </div>
-            {%- endif -%}
-          </div>
-
-          <div class="mp-event-body">
-            <h3 class="mp-event-title mp-mb-1">{{ e.Title }}</h3>
-
-            {%- if e.Subtitle and e.Subtitle != '' -%}
-              <div class="mp-text-muted mp-small mp-mb-2">{{ e.Subtitle }}</div>
-            {%- endif -%}
-
-            <div class="mp-event-meta mp-small mp-text-muted">
-              {%- if e.Start and e.Start != '' -%}<span>{{ e.Start }}</span>{%- endif -%}
-              {%- if e.Location and e.Location != '' -%}<span> • {{ e.Location }}</span>{%- endif -%}
+        <a href="{{ detail_url }}" style="text-decoration:none;color:inherit;display:block;">
+          <article class="mp-card mp-shadow-sm mp-event-card">
+            <div class="mp-event-media">
+              {%- if has_img -%}
+                <img
+                  class="mp-event-media-img"
+                  src="{{ img_url }}"
+                  alt="{{ e.Event_Title | escape }}"
+                  loading="lazy"
+                />
+              {%- else -%}
+                <div class="mp-event-media-fallback">
+                  No image available
+                </div>
+              {%- endif -%}
             </div>
-          </div>
 
-        </article>
+            <div class="mp-event-body">
+              <p class="mp-text-muted mp-small mp-mb-1">
+                {{ e.Event_Start_Date | date: "%a, %b %e, %Y • %l:%M %p" }}
+              </p>
 
+              <h3 class="mp-event-title mp-mb-2">
+                {{ e.Event_Title }}
+              </h3>
+
+              <p class="mp-text-muted mp-mb-0">
+                <!-- Placeholder until Description is added to the JSON -->
+                   {{ e.Description | default: "Description coming soon…" }}
+              </p>
+            </div>
+          </article>
+        </a>
       </div>
     {%- endfor -%}
-
   </div>
 </div>
