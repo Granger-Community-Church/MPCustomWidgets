@@ -1,0 +1,30 @@
+/* ========== Apollos Watch – Tile Uniformity Fix ========== */
+
+/* Make every card a predictable flex column */
+.mp-embed-2022 .apollos-widget .sc-hZDyAQ.fJeohJ {
+  display: flex;
+  flex-direction: column;
+  height: 340px;               /* adjust if you want bigger/smaller tiles */
+}
+
+/* Normalize image sizing */
+.mp-embed-2022 .apollos-widget .sc-hZDyAQ.fJeohJ img {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  display: block;
+  flex-shrink: 0;
+}
+
+/* Clamp the title so it can’t stretch the card */
+.mp-embed-2022 .apollos-widget div.sc-ikkxIA.lMkRR {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;      /* max lines before truncation */
+  overflow: hidden;
+}
+
+/* Ensure the text block area is always the same height */
+.mp-embed-2022 .apollos-widget .sc-ikkxIA.lMkRR {
+  min-height: 3.1em;         /* matches 2 lines of your current font */
+}
