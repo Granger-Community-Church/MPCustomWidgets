@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Custom Widget Demo</title>
+    <link href="/dist/css/mp-custom.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@apollosproject/apollos-embeds@latest/widget/index.css?v=1767799869074" rel="stylesheet"/>
+          <script src="https://cdn.jsdelivr.net/npm/@apollosproject/apollos-embeds@latest/widget/index.js?v=1767799869074" defer></script>
+          <script>window.process = { env: { NODE_ENV: "production" } };</script>
+    </head>
+    
+    <body>
+        <div class="container">
+
+            <h2>ApollosDemo</h2>
+        
+                    <div data-type="FeatureFeed"
+                    data-church="granger_church"
+                    data-feature-feed="FeatureFeed:2cee7b22-2ef6-4618-b11d-f4fda90bf682"
+                    data-modal="true"
+                    class="apollos-widget"></div>
+                  
+        <script type="text/javascript" src="/dist/js/customWidgetV1.js"></script>
+    </body>
+</html>

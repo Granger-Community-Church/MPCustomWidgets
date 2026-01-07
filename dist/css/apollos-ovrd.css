@@ -1,49 +1,12 @@
-/* 1) container: make its children stretch */
-.mp-embed-2022 .apollos-widget .sc-guJBdh.hmlXPU{
-  align-items: stretch !important;
+/* common theme resets that break card grids */
+.apollos-widget img {
+  max-width: none !important; /* theme often forces 100% */
 }
 
-/* 2) the wrapper item: consistent height */
-.mp-embed-2022 .apollos-widget .sc-hZDyAQ.fJeohJ{
-  min-height: 340px !important; /* tweak */
-  height: 100% !important;
-  display: flex !important; /* important: lets inner 100% actually work */
+.apollos-widget * {
+  box-sizing: border-box !important;
 }
 
-/* 3) the actual card: fill wrapper */
-.mp-embed-2022 .apollos-widget .sc-hZDyAQ.fJeohJ > .content-card{
-  height: 100% !important;
-  display: flex !important;
-  flex-direction: column !important;
-}
-
-/* 4) image block: lock aspect ratio so thumbnails are uniform
-   (your thumbnail is that first child wrapper: .sc-aXZVg.cvjCSV) */
-.mp-embed-2022 .apollos-widget .content-card > .sc-aXZVg.cvjCSV{
-  aspect-ratio: 16 / 9 !important;
-  overflow: hidden !important;
-  flex: 0 0 auto !important;
-}
-
-/* the actual image-ish inner div (varies by hashed class) */
-.mp-embed-2022 .apollos-widget .content-card > .sc-aXZVg.cvjCSV > .sc-aXZVg{
-  height: 100% !important;
-  width: 100% !important;
-}
-
-/* 5) title clamp so long titles don't expand the card */
-.mp-embed-2022 .apollos-widget .sc-ikkxIA.lMkRR{
-  display: -webkit-box !important;
-  -webkit-box-orient: vertical !important;
-  -webkit-line-clamp: 2 !important;
-  overflow: hidden !important;
-  line-height: 1.2 !important;
-  max-height: 2.4em !important;
-}
-
-/* 6) keep the text area from growing weirdly */
-.mp-embed-2022 .apollos-widget .content-card > .sc-aXZVg.jYcput{
-  flex: 1 1 auto !important;
-  display: flex !important;
-  flex-direction: column !important;
+.apollos-widget p {
+  margin: 0 !important; /* theme margins can add height differences */
 }
