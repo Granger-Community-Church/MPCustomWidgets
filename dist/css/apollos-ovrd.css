@@ -1,34 +1,37 @@
-/* WATCH grid: make all tiles equal height */
+/* 1) container: make its children stretch */
 .mp-embed-2022 .apollos-widget .sc-guJBdh.hmlXPU{
-  align-items: stretch !important;     /* key for grid/flex layouts */
+  align-items: stretch !important;
 }
 
-/* card (grid item) */
+/* 2) the wrapper item: consistent height */
 .mp-embed-2022 .apollos-widget .sc-hZDyAQ.fJeohJ{
+  min-height: 340px !important; /* tweak */
+  height: 100% !important;
+  display: flex !important; /* important: lets inner 100% actually work */
+}
+
+/* 3) the actual card: fill wrapper */
+.mp-embed-2022 .apollos-widget .sc-hZDyAQ.fJeohJ > .content-card{
+  height: 100% !important;
   display: flex !important;
   flex-direction: column !important;
-  height: 100% !important;            /* lets the grid stretch it */
-  min-height: 340px !important;        /* sets uniform tile size (tweak) */
 }
 
-/* normalize thumbnail if it's an <img> */
-.mp-embed-2022 .apollos-widget .sc-hZDyAQ.fJeohJ img{
+/* 4) image block: lock aspect ratio so thumbnails are uniform
+   (your thumbnail is that first child wrapper: .sc-aXZVg.cvjCSV) */
+.mp-embed-2022 .apollos-widget .content-card > .sc-aXZVg.cvjCSV{
+  aspect-ratio: 16 / 9 !important;
+  overflow: hidden !important;
+  flex: 0 0 auto !important;
+}
+
+/* the actual image-ish inner div (varies by hashed class) */
+.mp-embed-2022 .apollos-widget .content-card > .sc-aXZVg.cvjCSV > .sc-aXZVg{
+  height: 100% !important;
   width: 100% !important;
-  aspect-ratio: 16 / 9 !important;
-  object-fit: cover !important;
-  display: block !important;
-  flex-shrink: 0 !important;
 }
 
-/* normalize thumbnail if it's a background-image div */
-.mp-embed-2022 .apollos-widget .sc-hZDyAQ.fJeohJ [style*="background-image"]{
-  aspect-ratio: 16 / 9 !important;
-  background-size: cover !important;
-  background-position: center !important;
-  flex-shrink: 0 !important;
-}
-
-/* title clamp so long titles don't change card height */
+/* 5) title clamp so long titles don't expand the card */
 .mp-embed-2022 .apollos-widget .sc-ikkxIA.lMkRR{
   display: -webkit-box !important;
   -webkit-box-orient: vertical !important;
@@ -38,7 +41,9 @@
   max-height: 2.4em !important;
 }
 
-/* optional: keep date/metadata pinned toward bottom */
-.mp-embed-2022 .apollos-widget .sc-hZDyAQ.fJeohJ > :last-child{
-  margin-top: auto !important;
+/* 6) keep the text area from growing weirdly */
+.mp-embed-2022 .apollos-widget .content-card > .sc-aXZVg.jYcput{
+  flex: 1 1 auto !important;
+  display: flex !important;
+  flex-direction: column !important;
 }
