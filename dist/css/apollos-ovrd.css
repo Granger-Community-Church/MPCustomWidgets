@@ -1,12 +1,11 @@
-/* common theme resets that break card grids */
-.apollos-widget img {
-  max-width: none !important; /* theme often forces 100% */
+/* isolate Apollos widget from your theme CSS */
+.apollos-widget,
+.apollos-widget * {
+  all: revert !important;
 }
 
+/* keep box-sizing sane */
+.apollos-widget,
 .apollos-widget * {
   box-sizing: border-box !important;
-}
-
-.apollos-widget p {
-  margin: 0 !important; /* theme margins can add height differences */
 }
