@@ -1,30 +1,47 @@
-/* ========== Apollos Watch – Tile Uniformity Fix ========== */
+/* ==== GCC Watch: force consistent tile heights even when titles wrap ==== */
 
-/* Make every card a predictable flex column */
+/* 1) Make the card wrapper stretch (often the <a> or parent div) */
 .mp-embed-2022 .apollos-widget .sc-hZDyAQ.fJeohJ {
-  display: flex;
-  flex-direction: column;
-  height: 340px;               /* adjust if you want bigger/smaller tiles */
+  display: flex !important;
+  flex-direction: column !important;
+  height: 100% !important;        /* key: don’t let it auto-grow per content */
+  min-height: 340px !important;   /* sets uniform tile height (tweak as needed) */
 }
 
-/* Normalize image sizing */
+/* If the clickable parent is the thing controlling height, force it too */
+.mp-embed-2022 .apollos-widget .sc-hZDyAQ.fJeohJ,
+.mp-embed-2022 .apollos-widget .sc-hZDyAQ.fJeohJ * {
+  box-sizing: border-box;
+}
+
+/* 2) Normalize the media area (handles <img> AND background-image divs) */
 .mp-embed-2022 .apollos-widget .sc-hZDyAQ.fJeohJ img {
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  object-fit: cover;
-  display: block;
-  flex-shrink: 0;
+  width: 100% !important;
+  aspect-ratio: 16 / 9 !important;
+  object-fit: cover !important;
+  display: block !important;
+  flex-shrink: 0 !important;
 }
 
-/* Clamp the title so it can’t stretch the card */
-.mp-embed-2022 .apollos-widget div.sc-ikkxIA.lMkRR {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;      /* max lines before truncation */
-  overflow: hidden;
+/* If the thumbnail is a div with background-image */
+.mp-embed-2022 .apollos-widget .sc-hZDyAQ.fJeohJ [style*="background-image"] {
+  aspect-ratio: 16 / 9 !important;
+  background-size: cover !important;
+  background-position: center !important;
+  flex-shrink: 0 !important;
 }
 
-/* Ensure the text block area is always the same height */
+/* 3) Clamp the title so it can’t grow the card */
 .mp-embed-2022 .apollos-widget .sc-ikkxIA.lMkRR {
-  min-height: 3.1em;         /* matches 2 lines of your current font */
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+  overflow: hidden !important;
+  line-height: 1.2 !important;
+  max-height: 2.4em !important;   /* 2 lines x 1.2 */
+}
+
+/* 4) Make the text area take remaining space evenly */
+.mp-embed-2022 .apollos-widget .sc-hZDyAQ.fJeohJ > *:last-child {
+  margin-top: auto !important;
 }
