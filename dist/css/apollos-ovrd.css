@@ -1,17 +1,17 @@
 /* Make sure the widget can actually take full available width */
-#apollos-widget {
+#apollos-widget-host {
   width: 100%;
   max-width: none;
 }
 
 /* If any ancestor is a flex container, prevent shrink-to-content */
-#apollos-widget {
+#apollos-widget-host {
   flex: 1 1 auto;
   min-width: 0;
   align-self: stretch;
 }
 
 /* Common global rule that breaks tile math */
-#apollos-widget img {
+#apollos-widget-host img {
   max-width: none;
 }
