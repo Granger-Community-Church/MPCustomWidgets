@@ -1,11 +1,17 @@
-/* isolate Apollos widget from your theme CSS */
-.apollos-widget,
-.apollos-widget * {
-  all: revert !important;
+/* Make sure the widget can actually take full available width */
+#apollos-widget {
+  width: 100%;
+  max-width: none;
 }
 
-/* keep box-sizing sane */
-.apollos-widget,
-.apollos-widget * {
-  box-sizing: border-box !important;
+/* If any ancestor is a flex container, prevent shrink-to-content */
+#apollos-widget {
+  flex: 1 1 auto;
+  min-width: 0;
+  align-self: stretch;
+}
+
+/* Common global rule that breaks tile math */
+#apollos-widget img {
+  max-width: none;
 }
