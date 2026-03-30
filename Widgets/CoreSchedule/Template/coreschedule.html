@@ -35,7 +35,7 @@
             {% endunless %}
             {% for element in DataSet1 %}
                 <strong>{{element.Event_Title}} ({{element.Location_Name}}):</strong><br />
-                <a href="https://grangerchurch.com/mp-events/event/?id={{element.Event_ID}}">{{element.Event_Start_Date | date: "%A, %B %-d, %l:%M %P", 0}}&nbsp;&mdash;{{element.Event_End_Date | date: "%l:%M %P", 0}}</a><br/>
+                <a href="/event-details/?id={{element.Event_ID}}">{{element.Event_Start_Date | date: "%A, %B %-d, %l:%M %P", 0}}&nbsp;&mdash;{{element.Event_End_Date | date: "%l:%M %P", 0}}</a><br/>
             {% endfor %}
         </p>
     </div>
