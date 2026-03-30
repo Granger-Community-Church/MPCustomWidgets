@@ -1,0 +1,81 @@
+<style>
+/* Granger MP Custom widget work
+ * Added by Justin Moore 2023-10-20
+*/
+
+.mpcw-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* Two equal columns */
+    gap: 10px; /* Adjust the gap between cells as needed */
+    /*echo test*/
+    max-width: 850px; /* Set a maximum width for the grid */
+	margin: 0px auto; /* Center the grid */
+	}
+        
+.mpcw-grid-item {
+	/* border: 1px solid #ccc; */
+    padding: 12;
+    text-align: left;
+    min-width: 376px;
+    }
+        
+@media (max-width: 782px) {
+	.mpcw-grid {
+	grid-template-columns: 1fr; /* Single column on smaller screens */
+    }
+	}
+</style>
+
+<div class="mpcw-grid" style="">
+    <div class="mpcw-grid-item">
+        <h3>Core 101</h3>
+        <p>
+            {% unless DataSet1.size > 0 %}
+            New dates coming soon!
+            {% endunless %}
+            {% for element in DataSet1 %}
+                <strong>{{element.Event_Title}} ({{element.Location_Name}}):</strong><br />
+                <a href="https://grangerchurch.com/mp-events/event/?id={{element.Event_ID}}">{{element.Event_Start_Date | date: "%A, %B %-d, %l:%M %P", 0}}&nbsp;&mdash;{{element.Event_End_Date | date: "%l:%M %P", 0}}</a><br/>
+            {% endfor %}
+        </p>
+    </div>
+
+    <div class="mpcw-grid-item">
+        <h3>Core 201</h3>
+        <p>
+            {% unless DataSet2.size > 0 %}
+            New dates coming soon!
+            {% endunless %}
+            {% for element in DataSet2 %}
+                <strong>{{element.Event_Title}} ({{element.Location_Name}}):</strong><br />
+                <a href="https://grangerchurch.com/my-core-classes">{{element.Event_Start_Date | date: "%A, %B %-d, %l:%M %P", 0}}&nbsp;&mdash;{{element.Event_End_Date | date: "%l:%M %P", 0}}</a><br/>
+            {% endfor %}
+        </p>
+    </div>
+
+    <div class="mpcw-grid-item">
+        <h3>Core 301</h3>
+        <p>
+            {% unless DataSet3.size > 0 %}
+            New dates coming soon!
+            {% endunless %}
+            {% for element in DataSet3 %}
+                <strong>{{element.Event_Title}} ({{element.Location_Name}}):</strong><br />
+                <a href="https://grangerchurch.com/my-core-classes">{{element.Event_Start_Date | date: "%A, %B %-d, %l:%M %P", 0}}&nbsp;&mdash;{{element.Event_End_Date | date: "%l:%M %P", 0}}</a><br/>
+            {% endfor %}
+        </p>
+    </div>
+
+    <div class="mpcw-grid-item">
+        <h3>Core 401</h3>
+        <p>
+            {% unless DataSet4.size > 0 %}
+            New dates coming soon!
+            {% endunless %}
+            {% for element in DataSet4 %}
+                <strong>{{element.Event_Title}} ({{element.Location_Name}}):</strong><br />
+                <a href="https://grangerchurch.com/my-core-classes">{{element.Event_Start_Date | date: "%A, %B %-d, %l:%M %P", 0}}&nbsp;&mdash;{{element.Event_End_Date | date: "%l:%M %P", 0}}</a><br/>
+            {% endfor %}
+        </p>
+    </div>
+</div>
