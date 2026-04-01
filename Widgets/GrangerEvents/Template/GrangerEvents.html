@@ -1,9 +1,9 @@
 <style>
   /* ── Card Grid ── */
-  .ge-grid { display:flex; flex-wrap:wrap; gap:1.5rem; font-family:Poppins, sans-serif; }
-  .ge-col { flex:0 0 100%; max-width:100%; box-sizing:border-box; }
-  @media(min-width:768px){ .ge-col{ flex:0 0 calc(50% - 0.75rem); max-width:calc(50% - 0.75rem); } }
-  @media(min-width:1024px){ .ge-col{ flex:0 0 calc(33.333% - 1rem); max-width:calc(33.333% - 1rem); } }
+  .ge-grid { display:grid; grid-template-columns:1fr; gap:1.5rem; font-family:Poppins, sans-serif; }
+  @media(min-width:600px){ .ge-grid{ grid-template-columns:repeat(2, 1fr); } }
+  @media(min-width:1024px){ .ge-grid{ grid-template-columns:repeat(3, 1fr); } }
+  .ge-col { box-sizing:border-box; }
 
   /* ── Card ── */
   .ge-card {
@@ -61,7 +61,6 @@
 
   .ge-desc {
     font-size:0.95rem; color:#555; line-height:1.6; flex:1; margin:0 0 1rem;
-    display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden;
   }
 
   /* ── More Info Button ── */
@@ -125,7 +124,7 @@
     {%- for e in DataSet1 -%}
       {%- assign has_img = e.Image_GUID | size | plus: 0 -%}
       {%- assign img_url = e.File_URL | append: e.Image_GUID -%}
-      {%- assign plain_desc = e.Description | strip_html | truncate: 200 -%}
+      {%- assign plain_desc = e.Description | strip_html | truncate: 300 -%}
 
       <div class="ge-col" data-sort="{{ e.Event_Start_Date }}">
         <div class="ge-card" data-event-id="{{ e.Event_ID }}">
