@@ -51,7 +51,7 @@
             {%- endif -%}
           </div>
           <div class="ge-body">
-            {%- if e.Congregation_Name -%}
+            {%- if e.Congregation_Name == "Granger Campus" or e.Congregation_Name == "Elkhart Campus" or e.Congregation_Name == "Online" -%}
               <div class="ge-campus">
                 <span class="ge-campus-dot"></span>
                 {{ e.Congregation_Name }}
@@ -79,13 +79,13 @@
         <div class="ge-modal-body">
           <h2 class="ge-modal-title">{{ e.Event_Title }}</h2>
           {%- assign m_has_end = e.Event_End_Date | size | plus: 0 -%}
-          {%- assign m_start_day = e.Event_Start_Date | date: "%-d" -%}
-          {%- assign m_end_day = e.Event_End_Date | date: "%-d" -%}
-          {%- assign m_start_month = e.Event_Start_Date | date: "%b" -%}
-          {%- assign m_end_month = e.Event_End_Date | date: "%b" -%}
+          {%- assign m_start_ymd = e.Event_Start_Date | date: "%Y-%m-%d" -%}
+          {%- assign m_end_ymd = e.Event_End_Date | date: "%Y-%m-%d" -%}
           <div class="ge-modal-meta">
-            {%- if m_has_end > 0 and m_end_day != m_start_day or m_end_month != m_start_month -%}
-            <span>{{ e.Event_Start_Date | date: "%a, %b %-d" }} &ndash; {{ e.Event_End_Date | date: "%a, %b %-d, %Y" }}</span>
+            {%- if m_has_end > 0 and m_end_ymd != m_start_ymd -%}
+            <span>{{ e.Event_Start_Date | date: "%A, %B %-d, %l:%M %p" }} to {{ e.Event_End_Date | date: "%A, %B %-d, %l:%M %p" }}</span>
+            {%- elsif m_has_end > 0 -%}
+            <span>{{ e.Event_Start_Date | date: "%A, %B %-d" }}, {{ e.Event_Start_Date | date: "%-l:%M" }}-{{ e.Event_End_Date | date: "%-l:%M %p" }}</span>
             {%- else -%}
             <span>{{ e.Event_Start_Date | date: "%A, %B %-d, %Y &bull; %l:%M %p" }}</span>
             {%- endif -%}

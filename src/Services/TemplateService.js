@@ -8,7 +8,8 @@ export class TemplateService {
     static GetEngine() {
         this.engine = new Liquid({
             root: '/',
-            extname: '.html'          // extension used for layouts/includes (.html) templates
+            extname: '.html',          // extension used for layouts/includes (.html) templates
+            preserveTimezones: true    // keep date strings as-is, no UTC conversion
         });
 
         this.engine.registerFilter('mp_currency', (value) => {
