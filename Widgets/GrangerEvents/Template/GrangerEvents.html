@@ -1,45 +1,190 @@
+<style>
+  /* ── Card Grid ── */
+  .ge-grid { display:flex; flex-wrap:wrap; gap:1.5rem; font-family:Poppins, sans-serif; }
+  .ge-col { flex:0 0 100%; max-width:100%; box-sizing:border-box; }
+  @media(min-width:768px){ .ge-col{ flex:0 0 calc(50% - 0.75rem); max-width:calc(50% - 0.75rem); } }
+  @media(min-width:1024px){ .ge-col{ flex:0 0 calc(33.333% - 1rem); max-width:calc(33.333% - 1rem); } }
+
+  /* ── Card ── */
+  .ge-card {
+    display:flex; flex-direction:column; overflow:hidden; cursor:pointer;
+    background:#efefef; border-radius:8px; height:100%;
+    transition:box-shadow 0.2s;
+  }
+  .ge-card:hover { box-shadow:0 6px 20px rgba(0,0,0,0.12); }
+
+  /* ── Image + Date Badge ── */
+  .ge-media { position:relative; width:100%; padding-top:60%; overflow:hidden; background:#e0e0e0; }
+  .ge-media img { position:absolute; top:0; left:0; width:100%; height:100%; object-fit:cover; }
+  .ge-media-fallback {
+    position:absolute; top:0; left:0; width:100%; height:100%;
+    display:flex; align-items:center; justify-content:center;
+    color:#999; font-size:0.875rem;
+  }
+
+  .ge-date-badge {
+    position:absolute; top:0; left:0;
+    background:rgba(255,255,255,0.94);
+    border-radius:0 0 8px 0;
+    padding:0.5rem 0.75rem; text-align:center; line-height:1.15;
+    min-width:3.25rem; transition:background 0.2s, color 0.2s;
+  }
+  .ge-card:hover .ge-date-badge {
+    background:#abd424; color:#fff;
+  }
+  .ge-date-badge .ge-badge-month {
+    display:block; font-size:0.7rem; font-weight:600;
+    text-transform:uppercase; letter-spacing:0.06em; color:#555;
+  }
+  .ge-card:hover .ge-date-badge .ge-badge-month { color:#fff; }
+  .ge-date-badge .ge-badge-day {
+    display:block; font-size:1.5rem; font-weight:700; color:#092c4c;
+  }
+  .ge-card:hover .ge-date-badge .ge-badge-day { color:#fff; }
+
+  /* ── Card Body ── */
+  .ge-body { padding:1rem 1.25rem 1.25rem; flex:1; display:flex; flex-direction:column; }
+
+  .ge-campus {
+    display:flex; align-items:center; gap:0.4rem;
+    font-size:0.875rem; color:#555; margin-bottom:0.35rem;
+  }
+  .ge-campus-dot {
+    width:0.55rem; height:0.55rem; border-radius:50%;
+    background:#abd424; flex-shrink:0;
+  }
+
+  .ge-title {
+    font-size:1.5rem; font-weight:600; margin:0 0 0.5rem;
+    line-height:1.3; color:#092c4c;
+  }
+
+  .ge-desc {
+    font-size:0.95rem; color:#555; line-height:1.6; flex:1; margin:0 0 1rem;
+    display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden;
+  }
+
+  /* ── More Info Button ── */
+  .ge-more-info {
+    display:inline-block; margin-top:auto; padding:12px 24px;
+    background:#333; color:#fff; text-decoration:none;
+    border-radius:8px; font-family:Poppins, sans-serif;
+    font-weight:300; font-size:1rem; text-transform:uppercase;
+    letter-spacing:0.03em; transition:background 0.2s;
+    border:none; cursor:pointer; text-align:center;
+    align-self:flex-start;
+  }
+  .ge-more-info:hover { background:#2c9fa1; color:#fff; }
+
+  /* ── Modal ── */
+  .ge-overlay {
+    display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+    background:rgba(0,0,0,0.6); z-index:9999; justify-content:center; align-items:flex-start;
+    padding:2rem 1rem; overflow-y:auto; font-family:Poppins, sans-serif;
+  }
+  .ge-overlay.ge-open { display:flex; }
+
+  .ge-modal {
+    background:#fff; border-radius:8px; max-width:700px; width:100%;
+    margin:auto; position:relative; box-shadow:0 20px 60px rgba(0,0,0,0.3);
+  }
+  .ge-modal-img {
+    width:100%; aspect-ratio:16/9; object-fit:cover;
+    border-radius:8px 8px 0 0; display:block;
+  }
+  .ge-modal-body { padding:1.5rem 2rem 2rem; }
+  .ge-modal-title { font-size:1.5rem; font-weight:700; margin:0 0 0.5rem; color:#092c4c; }
+
+  .ge-modal-meta { font-size:0.95rem; color:#555; margin-bottom:1.25rem; display:flex; flex-wrap:wrap; gap:0.25rem 1.25rem; }
+  .ge-modal-loc { display:flex; align-items:center; gap:0.4rem; }
+  .ge-modal-loc .ge-campus-dot { width:0.5rem; height:0.5rem; }
+
+  .ge-modal-desc { font-size:1rem; line-height:1.7; color:#333; }
+  .ge-modal-desc img { max-width:100%; height:auto; }
+
+  .ge-close {
+    position:absolute; top:0.75rem; right:0.75rem; width:2.25rem; height:2.25rem;
+    border-radius:50%; border:none; background:rgba(0,0,0,0.45); color:#fff;
+    font-size:1.3rem; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    line-height:1; z-index:1; transition:background 0.2s;
+  }
+  .ge-close:hover { background:rgba(0,0,0,0.7); }
+
+  .ge-register {
+    display:inline-block; margin-top:1.25rem; padding:12px 24px;
+    background:#333; color:#fff; text-decoration:none;
+    border-radius:8px; font-family:Poppins, sans-serif;
+    font-weight:300; font-size:1rem; text-transform:uppercase;
+    letter-spacing:0.03em; transition:background 0.2s;
+  }
+  .ge-register:hover { background:#2c9fa1; color:#fff; }
+</style>
+
 <div class="mp-container mp-mt-4">
-  <div class="mp-row">
+  <div class="ge-grid" id="ge-card-grid-{{ widgetId }}">
     {%- for e in DataSet1 -%}
-      {%- assign detail_url = "https://grangerchurch.com/event-detail?id=" | append: e.Event_ID -%}
-      {%- assign has_img = e.Image_GUID and e.Image_GUID != "" -%}
+      {%- assign has_img = e.Image_GUID | size | plus: 0 -%}
       {%- assign img_url = e.File_URL | append: e.Image_GUID -%}
+      {%- assign plain_desc = e.Description | strip_html | truncate: 200 -%}
 
-      <div class="mp-col-12 mp-col-md-6 mp-col-lg-4 mp-mb-3">
-        <a href="{{ detail_url }}" style="text-decoration:none;color:inherit;display:block;">
-          <article class="mp-card mp-shadow-sm mp-event-card">
-            <div class="mp-event-media">
-              {%- if has_img -%}
-                <img
-                  class="mp-event-media-img"
-                  src="{{ img_url }}"
-                  alt="{{ e.Event_Title | escape }}"
-                  loading="lazy"
-                />
-              {%- else -%}
-                <div class="mp-event-media-fallback">
-                  No image available
-                </div>
-              {%- endif -%}
+      <div class="ge-col" data-sort="{{ e.Event_Start_Date }}">
+        <div class="ge-card" data-event-id="{{ e.Event_ID }}">
+          <div class="ge-media">
+            {%- if has_img > 0 -%}
+              <img src="{{ img_url }}" alt="{{ e.Event_Title | escape }}" loading="lazy" />
+            {%- else -%}
+              <div class="ge-media-fallback">No image available</div>
+            {%- endif -%}
+            <div class="ge-date-badge">
+              <span class="ge-badge-month">{{ e.Event_Start_Date | date: "%b" }}</span>
+              <span class="ge-badge-day">{{ e.Event_Start_Date | date: "%-d" }}</span>
             </div>
-
-            <div class="mp-event-body">
-              <p class="mp-text-muted mp-small mp-mb-1">
-                {{ e.Event_Start_Date | date: "%a, %b %e, %Y • %l:%M %p" }}
-              </p>
-
-              <h3 class="mp-event-title mp-mb-2">
-                {{ e.Event_Title }}
-              </h3>
-
-              <p class="mp-text-muted mp-mb-0">
-                <!-- Placeholder until Description is added to the JSON -->
-                   {{ e.Description | default: "Description coming soon…" }}
-              </p>
-            </div>
-          </article>
-        </a>
+          </div>
+          <div class="ge-body">
+            {%- if e.Congregation_Name -%}
+              <div class="ge-campus">
+                <span class="ge-campus-dot"></span>
+                {{ e.Congregation_Name }}
+              </div>
+            {%- endif -%}
+            <h3 class="ge-title">{{ e.Event_Title }}</h3>
+            <p class="ge-desc">{{ plain_desc | default: "" }}</p>
+            <span class="ge-more-info">More Info</span>
+          </div>
+        </div>
       </div>
     {%- endfor -%}
   </div>
+
+  <!-- Modals -->
+  {%- for e in DataSet1 -%}
+    {%- assign has_img = e.Image_GUID | size | plus: 0 -%}
+    {%- assign img_url = e.File_URL | append: e.Image_GUID -%}
+    <div class="ge-overlay" id="ge-modal-{{ e.Event_ID }}">
+      <div class="ge-modal">
+        <button class="ge-close" aria-label="Close">&times;</button>
+        {%- if has_img > 0 -%}
+          <img class="ge-modal-img" src="{{ img_url }}" alt="{{ e.Event_Title | escape }}" />
+        {%- endif -%}
+        <div class="ge-modal-body">
+          <h2 class="ge-modal-title">{{ e.Event_Title }}</h2>
+          <div class="ge-modal-meta">
+            <span>{{ e.Event_Start_Date | date: "%A, %B %-d, %Y &bull; %l:%M %p" }}</span>
+            {%- if e.Location_Name -%}
+              <span class="ge-modal-loc">
+                <span class="ge-campus-dot"></span>
+                {{ e.Location_Name }}
+              </span>
+            {%- endif -%}
+          </div>
+          <div class="ge-modal-desc">
+            {{ e.Additional_Description | default: e.Description | default: "" }}
+          </div>
+          {%- if e.Show_Registration -%}
+            <a class="ge-register" href="/event-details?id={{ e.Event_ID }}">Register Now</a>
+          {%- endif -%}
+        </div>
+      </div>
+    </div>
+  {%- endfor -%}
 </div>

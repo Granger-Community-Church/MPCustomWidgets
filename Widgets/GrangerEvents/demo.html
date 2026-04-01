@@ -3,25 +3,131 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Custom Widget Demo</title>
+    <title>GrangerEvents Widget Demo</title>
     <link href="https://cdn.jsdelivr.net/gh/Granger-Community-Church/MPCustomWidgets@main/dist/css/mp-custom.css" rel="stylesheet">
-    </head>
-    
-    <body>
-        <div class="container">
+  </head>
 
-            <h2>GrangerEvents</h2>
-            <p>Widget Cloned by create-widget</p>
-            <div id="GrangerEvents" 
-                data-component="CustomWidget" 
-                data-sp="api_Custom_GetRegistrationEvents" 
-                data-template="/Widgets/GrangerEvents/Template/GrangerEvents.html" 
-                data-requireUser="false" 
-                data-cache="false"
-                data-debug="true"
-                data-host="grangerchurch"></div>
+  <body>
+    <div class="container">
 
-        </div>            
-        <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/Granger-Community-Church/MPCustomWidgets@main/dist/js/customWidgetV1.js"></script>
-    </body>
+      <h2>GrangerEvents</h2>
+
+      <h3>All Events (no filters)</h3>
+      <div id="GrangerEvents"
+          data-component="CustomWidget"
+          data-sp="api_Custom_GetRegistrationEvents"
+          data-template="/Widgets/GrangerEvents/Template/GrangerEvents.html"
+          data-requireUser="false"
+          data-cache="false"
+          data-debug="true"
+          data-host="grangerchurch"></div>
+
+      <h3>Filtered by Congregation (Granger Campus = 1)</h3>
+      <div id="GrangerEvents-Congregation"
+          data-component="CustomWidget"
+          data-sp="api_Custom_GetRegistrationEvents"
+          data-template="/Widgets/GrangerEvents/Template/GrangerEvents.html"
+          data-params="@CongregationID=1"
+          data-requireUser="false"
+          data-cache="false"
+          data-debug="true"
+          data-host="grangerchurch"></div>
+
+      <h3>Filtered by Program (Baptism Orientation = 1551)</h3>
+      <div id="GrangerEvents-Program"
+          data-component="CustomWidget"
+          data-sp="api_Custom_GetRegistrationEvents"
+          data-template="/Widgets/GrangerEvents/Template/GrangerEvents.html"
+          data-params="@ProgramID=1551"
+          data-requireUser="false"
+          data-cache="false"
+          data-debug="true"
+          data-host="grangerchurch"></div>
+
+      <h3>Filtered by Featured Events Only</h3>
+      <div id="GrangerEvents-Featured"
+          data-component="CustomWidget"
+          data-sp="api_Custom_GetRegistrationEvents"
+          data-template="/Widgets/GrangerEvents/Template/GrangerEvents.html"
+          data-params="@Featured=1"
+          data-requireUser="false"
+          data-cache="false"
+          data-debug="true"
+          data-host="grangerchurch"></div>
+
+    </div>
+
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/Granger-Community-Church/MPCustomWidgets@main/dist/js/customWidgetV1.js"></script>
+
+    <script>
+    // Initialize GrangerEvents interactivity after each widget loads
+    window.addEventListener('widgetLoaded', function(e) {
+      var container = document.getElementById(e.detail.widgetId);
+      if (!container) return;
+
+      var grid = container.querySelector('[id^="ge-card-grid"]');
+      if (!grid) return; // Not a GrangerEvents widget
+
+      // Sort cards by Event_Start_Date ascending
+      var cols = Array.from(grid.querySelectorAll('.ge-col'));
+      cols.sort(function(a, b) {
+        return (a.getAttribute('data-sort') || '').localeCompare(b.getAttribute('data-sort') || '');
+      });
+      cols.forEach(function(col) { grid.appendChild(col); });
+
+      // Modal helpers
+      function openModal(eventId) {
+        var modal = document.getElementById('ge-modal-' + eventId);
+        if (modal) {
+          modal.classList.add('ge-open');
+          document.body.style.overflow = 'hidden';
+          history.replaceState(null, '', '#' + eventId);
+        }
+      }
+
+      function closeAllModals() {
+        document.querySelectorAll('.ge-overlay.ge-open').forEach(function(m) {
+          m.classList.remove('ge-open');
+        });
+        document.body.style.overflow = '';
+        history.replaceState(null, '', window.location.pathname + window.location.search);
+      }
+
+      // Card click → open modal
+      container.querySelectorAll('.ge-card').forEach(function(card) {
+        card.addEventListener('click', function(e) {
+          e.preventDefault();
+          openModal(card.getAttribute('data-event-id'));
+        });
+      });
+
+      // Close button
+      container.querySelectorAll('.ge-close').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          closeAllModals();
+        });
+      });
+
+      // Click overlay backdrop to close
+      container.querySelectorAll('.ge-overlay').forEach(function(overlay) {
+        overlay.addEventListener('click', function(e) {
+          if (e.target === overlay) closeAllModals();
+        });
+      });
+
+      // Escape key to close (only bind once)
+      if (!window._geEscapeBound) {
+        document.addEventListener('keydown', function(e) {
+          if (e.key === 'Escape') closeAllModals();
+        });
+        window._geEscapeBound = true;
+      }
+
+      // On load, check hash for deep link
+      var hash = window.location.hash.replace('#', '');
+      if (hash) openModal(hash);
+    });
+    </script>
+  </body>
 </html>
