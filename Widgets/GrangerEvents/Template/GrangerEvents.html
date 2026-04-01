@@ -4,10 +4,10 @@
       {%- assign has_img = e.Image_GUID | size | plus: 0 -%}
       {%- assign img_url = e.File_URL | append: e.Image_GUID -%}
       {%- assign plain_desc = e.Description | strip_html | truncate: 300 -%}
-      {%- assign start_day = e.Event_Start_Date | date: "%-d" -%}
-      {%- assign start_month = e.Event_Start_Date | date: "%b" -%}
-      {%- assign end_day = e.Event_End_Date | date: "%-d" -%}
-      {%- assign end_month = e.Event_End_Date | date: "%b" -%}
+      {%- assign start_day = e.Event_Start_Date | local_date: "%-d" -%}
+      {%- assign start_month = e.Event_Start_Date | local_date: "%b" -%}
+      {%- assign end_day = e.Event_End_Date | local_date: "%-d" -%}
+      {%- assign end_month = e.Event_End_Date | local_date: "%b" -%}
       {%- assign has_end = e.Event_End_Date | size | plus: 0 -%}
       {%- assign is_multiday = false -%}
       {%- assign is_crossmonth = false -%}
@@ -79,15 +79,15 @@
         <div class="ge-modal-body">
           <h2 class="ge-modal-title">{{ e.Event_Title }}</h2>
           {%- assign m_has_end = e.Event_End_Date | size | plus: 0 -%}
-          {%- assign m_start_ymd = e.Event_Start_Date | date: "%Y-%m-%d" -%}
-          {%- assign m_end_ymd = e.Event_End_Date | date: "%Y-%m-%d" -%}
+          {%- assign m_start_ymd = e.Event_Start_Date | local_date: "%Y-%m-%d" -%}
+          {%- assign m_end_ymd = e.Event_End_Date | local_date: "%Y-%m-%d" -%}
           <div class="ge-modal-meta">
             {%- if m_has_end > 0 and m_end_ymd != m_start_ymd -%}
-            <span>{{ e.Event_Start_Date | date: "%A, %B %-d, %l:%M %p" }} to {{ e.Event_End_Date | date: "%A, %B %-d, %l:%M %p" }}</span>
+            <span>{{ e.Event_Start_Date | local_date: "%A, %B %-d, %l:%M %p" }} to {{ e.Event_End_Date | local_date: "%A, %B %-d, %l:%M %p" }}</span>
             {%- elsif m_has_end > 0 -%}
-            <span>{{ e.Event_Start_Date | date: "%A, %B %-d" }}, {{ e.Event_Start_Date | date: "%-l:%M" }}-{{ e.Event_End_Date | date: "%-l:%M %p" }}</span>
+            <span>{{ e.Event_Start_Date | local_date: "%A, %B %-d" }}, {{ e.Event_Start_Date | local_date: "%-l:%M" }}-{{ e.Event_End_Date | local_date: "%-l:%M %p" }}</span>
             {%- else -%}
-            <span>{{ e.Event_Start_Date | date: "%A, %B %-d, %Y &bull; %l:%M %p" }}</span>
+            <span>{{ e.Event_Start_Date | local_date: "%A, %B %-d, %Y &bull; %l:%M %p" }}</span>
             {%- endif -%}
             {%- if e.Location_Name -%}
               <span class="ge-modal-loc">

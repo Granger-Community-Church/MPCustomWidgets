@@ -20,7 +20,7 @@ export class TemplateService {
         // API returns dates like "2026-04-02T09:30:00" (no TZ suffix = local time),
         // but JS Date() treats these as local then LiquidJS formats in UTC, causing offset.
         // This parses the ISO components directly so 09:30 stays 09:30.
-        this.engine.registerFilter('date', (value, format) => {
+        this.engine.registerFilter('local_date', (value, format) => {
             if (!value || !format) return value;
             const s = String(value);
             const m = s.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/);
