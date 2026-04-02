@@ -16,13 +16,13 @@
             <div class="ge-date-badge" data-start="{{ e.Event_Start_Date }}" data-end="{{ e.Event_End_Date }}"></div>
           </div>
           <div class="ge-body">
+            <h3 class="ge-title">{{ e.Event_Title }}</h3>
             {%- if e.Congregation_Name == "Granger Campus" or e.Congregation_Name == "Elkhart Campus" or e.Congregation_Name == "Online" -%}
               <div class="ge-campus">
                 <span class="ge-campus-dot"></span>
                 {{ e.Congregation_Name }}
               </div>
             {%- endif -%}
-            <h3 class="ge-title">{{ e.Event_Title }}</h3>
             <p class="ge-desc">{{ plain_desc | default: "" }}</p>
             <span class="ge-more-info">More Info</span>
           </div>
@@ -45,13 +45,13 @@
           <h2 class="ge-modal-title">{{ e.Event_Title }}</h2>
           <div class="ge-modal-meta">
             <span class="ge-modal-datetime" data-start="{{ e.Event_Start_Date }}" data-end="{{ e.Event_End_Date }}"></span>
-            {%- if e.Location_Name -%}
-              <span class="ge-modal-loc">
-                <span class="ge-campus-dot"></span>
-                {{ e.Location_Name }}
-              </span>
-            {%- endif -%}
           </div>
+          {%- if e.Location_Name -%}
+            <div class="ge-modal-loc">
+              <span class="ge-campus-dot"></span>
+              {{ e.Location_Name }}
+            </div>
+          {%- endif -%}
           <div class="ge-modal-desc">
             {{ e.Additional_Description | default: e.Description | default: "" }}
           </div>

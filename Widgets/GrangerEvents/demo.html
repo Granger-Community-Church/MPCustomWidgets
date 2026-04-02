@@ -65,18 +65,57 @@
     // the church's local time. We append 'Z' to treat them as UTC, then format
     // with timeZone:'UTC' so the displayed values match the original components
     // without any browser timezone shift.
-    function geFormatDate(isoStr, options) {
-      if (!isoStr) return '';
-      // API returns local times with a misleading 'Z' suffix (e.g. "2026-04-23T11:00:00.000Z").
-      // Strip the suffix and re-append 'Z' so JS treats the local time values as UTC,
-      // then format with timeZone:'UTC' to get them back out unchanged.
+    // Parse an ISO date string from the API into a Date object.
+    // API returns local times with a misleading 'Z' suffix (e.g. "2026-04-23T11:00:00.000Z").
+    // We strip the suffix and re-append 'Z' so JS treats the local time values as UTC,
+    // then always format with timeZone:'UTC' to get them back unchanged.
+    function geParse(isoStr) {
+      if (!isoStr) return null;
       var cleaned = String(isoStr).replace(/\.?\d*Z$/, '').replace(/[+-]\d{2}:\d{2}$/, '');
       var d = new Date(cleaned + 'Z');
       if (isNaN(d.getTime())) {
-        console.warn('geFormatDate: unable to parse date:', isoStr);
-        return '';
+        console.warn('geParse: unable to parse date:', isoStr);
+        return null;
       }
+      return d;
+    }
+
+    function geFormatDate(isoStr, options) {
+      var d = geParse(isoStr);
+      if (!d) return '';
       return new Intl.DateTimeFormat('en-US', Object.assign({}, options, { timeZone: 'UTC' })).format(d);
+    }
+
+    // Format a time per Granger style: no :00, lowercase a.m./p.m.
+    // "5 p.m."  "5:30 p.m."  "9:30 a.m."
+    function geFormatTime(isoStr) {
+      var d = geParse(isoStr);
+      if (!d) return '';
+      var h = d.getUTCHours();
+      var m = d.getUTCMinutes();
+      var hour12 = h % 12 || 12;
+      var period = h < 12 ? 'a.m.' : 'p.m.';
+      return m === 0 ? hour12 + ' ' + period : hour12 + ':' + String(m).padStart(2, '0') + ' ' + period;
+    }
+
+    // Format a same-day time range per Granger style:
+    // "5-6:30 p.m."  "5:30-8 p.m."  "9:30 a.m.-1 p.m."
+    function geFormatTimeRange(startIso, endIso) {
+      var ds = geParse(startIso);
+      var de = geParse(endIso);
+      if (!ds || !de) return geFormatTime(startIso);
+      var sH = ds.getUTCHours(), sM = ds.getUTCMinutes();
+      var eH = de.getUTCHours(), eM = de.getUTCMinutes();
+      var sHour12 = sH % 12 || 12, eHour12 = eH % 12 || 12;
+      var sPeriod = sH < 12 ? 'a.m.' : 'p.m.';
+      var ePeriod = eH < 12 ? 'a.m.' : 'p.m.';
+      var sTime = sM === 0 ? String(sHour12) : sHour12 + ':' + String(sM).padStart(2, '0');
+      var eTime = eM === 0 ? String(eHour12) : eHour12 + ':' + String(eM).padStart(2, '0');
+
+      if (sPeriod === ePeriod) {
+        return sTime + '-' + eTime + ' ' + ePeriod;
+      }
+      return sTime + ' ' + sPeriod + '-' + eTime + ' ' + ePeriod;
     }
 
     function geFormatDateBadges(container) {
@@ -131,22 +170,22 @@
         var endYmd = end ? end.slice(0, 10) : '';
 
         if (end && endYmd !== startYmd) {
-          // Multi-day: "Wednesday, April 2, 9:30 AM to Thursday, April 3, 5:00 PM"
-          el.textContent =
-            geFormatDate(start, { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' }) +
-            ' to ' +
-            geFormatDate(end, { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' });
-        } else if (end) {
-          // Same day: "Wednesday, April 2, 9:30 AM \u2013 11:00 AM"
+          // Multi-day: "Wednesday, April 2, 5 p.m. to Thursday, April 3, 6:30 p.m."
           el.textContent =
             geFormatDate(start, { weekday: 'long', month: 'long', day: 'numeric' }) + ', ' +
-            geFormatDate(start, { hour: 'numeric', minute: '2-digit' }) + ' \u2013 ' +
-            geFormatDate(end, { hour: 'numeric', minute: '2-digit' });
+            geFormatTime(start) + ' to ' +
+            geFormatDate(end, { weekday: 'long', month: 'long', day: 'numeric' }) + ', ' +
+            geFormatTime(end);
+        } else if (end) {
+          // Same day: "Wednesday, April 2, 5-6:30 p.m."
+          el.textContent =
+            geFormatDate(start, { weekday: 'long', month: 'long', day: 'numeric' }) + ', ' +
+            geFormatTimeRange(start, end);
         } else {
-          // No end date: "Wednesday, April 2, 2026 \u2022 9:30 AM"
+          // No end date: "Wednesday, April 2, 2026 \u2022 5 p.m."
           el.textContent =
             geFormatDate(start, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }) + ' \u2022 ' +
-            geFormatDate(start, { hour: 'numeric', minute: '2-digit' });
+            geFormatTime(start);
         }
       });
     }
