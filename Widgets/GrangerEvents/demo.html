@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>GrangerEvents Widget Demo</title>
-    <link href="https://cdn.jsdelivr.net/gh/Granger-Community-Church/MPCustomWidgets@main/dist/css/mp-custom.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/gh/Granger-Community-Church/MP-Widgets-CSS@main/mp-widgets.css" rel="stylesheet">
   </head>
 
   <body>
@@ -60,13 +60,112 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/Granger-Community-Church/MPCustomWidgets@main/dist/js/customWidgetV1.js"></script>
 
     <script>
-    // Initialize GrangerEvents interactivity after each widget loads
+    // --- Date formatting utilities ---
+    // MP API returns naive ISO strings (e.g. "2026-04-02T09:30:00") representing
+    // the church's local time. We append 'Z' to treat them as UTC, then format
+    // with timeZone:'UTC' so the displayed values match the original components
+    // without any browser timezone shift.
+    function geFormatDate(isoStr, options) {
+      if (!isoStr) return '';
+      // API returns local times with a misleading 'Z' suffix (e.g. "2026-04-23T11:00:00.000Z").
+      // Strip the suffix and re-append 'Z' so JS treats the local time values as UTC,
+      // then format with timeZone:'UTC' to get them back out unchanged.
+      var cleaned = String(isoStr).replace(/\.?\d*Z$/, '').replace(/[+-]\d{2}:\d{2}$/, '');
+      var d = new Date(cleaned + 'Z');
+      if (isNaN(d.getTime())) {
+        console.warn('geFormatDate: unable to parse date:', isoStr);
+        return '';
+      }
+      return new Intl.DateTimeFormat('en-US', Object.assign({}, options, { timeZone: 'UTC' })).format(d);
+    }
+
+    function geFormatDateBadges(container) {
+      container.querySelectorAll('.ge-date-badge[data-start]').forEach(function(badge) {
+        var start = badge.getAttribute('data-start');
+        var end = badge.getAttribute('data-end');
+        var startMonth = geFormatDate(start, { month: 'short' });
+        var startDay = geFormatDate(start, { day: 'numeric' });
+
+        if (end) {
+          var endMonth = geFormatDate(end, { month: 'short' });
+          var endDay = geFormatDate(end, { day: 'numeric' });
+          var startYmd = start.slice(0, 10);
+          var endYmd = end.slice(0, 10);
+
+          if (startYmd !== endYmd) {
+            if (startMonth !== endMonth) {
+              // Cross-month multi-day
+              badge.classList.add('ge-date-badge-crossmonth');
+              badge.innerHTML =
+                '<span class="ge-badge-date-start">' +
+                  '<span class="ge-badge-cm-month">' + startMonth + '</span>' +
+                  '<span class="ge-badge-cm-day">' + startDay + '</span>' +
+                '</span>' +
+                '<span class="ge-badge-cm-divider">&ndash;</span>' +
+                '<span class="ge-badge-date-end">' +
+                  '<span class="ge-badge-cm-month">' + endMonth + '</span>' +
+                  '<span class="ge-badge-cm-day">' + endDay + '</span>' +
+                '</span>';
+              return;
+            }
+            // Same-month multi-day
+            badge.innerHTML =
+              '<span class="ge-badge-month">' + startMonth + '</span>' +
+              '<span class="ge-badge-day">' + startDay + '&ndash;' + endDay + '</span>';
+            return;
+          }
+        }
+
+        // Single day
+        badge.innerHTML =
+          '<span class="ge-badge-month">' + startMonth + '</span>' +
+          '<span class="ge-badge-day">' + startDay + '</span>';
+      });
+    }
+
+    function geFormatModalDatetimes(container) {
+      container.querySelectorAll('.ge-modal-datetime[data-start]').forEach(function(el) {
+        var start = el.getAttribute('data-start');
+        var end = el.getAttribute('data-end');
+        var startYmd = start ? start.slice(0, 10) : '';
+        var endYmd = end ? end.slice(0, 10) : '';
+
+        if (end && endYmd !== startYmd) {
+          // Multi-day: "Wednesday, April 2, 9:30 AM to Thursday, April 3, 5:00 PM"
+          el.textContent =
+            geFormatDate(start, { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' }) +
+            ' to ' +
+            geFormatDate(end, { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+        } else if (end) {
+          // Same day: "Wednesday, April 2, 9:30 AM \u2013 11:00 AM"
+          el.textContent =
+            geFormatDate(start, { weekday: 'long', month: 'long', day: 'numeric' }) + ', ' +
+            geFormatDate(start, { hour: 'numeric', minute: '2-digit' }) + ' \u2013 ' +
+            geFormatDate(end, { hour: 'numeric', minute: '2-digit' });
+        } else {
+          // No end date: "Wednesday, April 2, 2026 \u2022 9:30 AM"
+          el.textContent =
+            geFormatDate(start, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }) + ' \u2022 ' +
+            geFormatDate(start, { hour: 'numeric', minute: '2-digit' });
+        }
+      });
+    }
+
+    // --- Widget initialization ---
     window.addEventListener('widgetLoaded', function(e) {
       var container = document.getElementById(e.detail.widgetId);
       if (!container) return;
 
       var grid = container.querySelector('[id^="ge-card-grid"]');
       if (!grid) return; // Not a GrangerEvents widget
+
+      // Format dates in the display layer
+      try {
+        geFormatDateBadges(container);
+        geFormatModalDatetimes(container);
+      } catch (err) {
+        console.error('Date formatting error:', err);
+      }
 
       // Sort cards by Event_Start_Date ascending
       var cols = Array.from(grid.querySelectorAll('.ge-col'));
@@ -93,7 +192,7 @@
         history.replaceState(null, '', window.location.pathname + window.location.search);
       }
 
-      // Card click → open modal
+      // Card click -> open modal
       container.querySelectorAll('.ge-card').forEach(function(card) {
         card.addEventListener('click', function(e) {
           e.preventDefault();

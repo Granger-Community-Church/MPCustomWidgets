@@ -4,19 +4,6 @@
       {%- assign has_img = e.Image_GUID | size | plus: 0 -%}
       {%- assign img_url = e.File_URL | append: e.Image_GUID -%}
       {%- assign plain_desc = e.Description | strip_html | truncate: 300 -%}
-      {%- assign start_day = e.Event_Start_Date | local_date: "%-d" -%}
-      {%- assign start_month = e.Event_Start_Date | local_date: "%b" -%}
-      {%- assign end_day = e.Event_End_Date | local_date: "%-d" -%}
-      {%- assign end_month = e.Event_End_Date | local_date: "%b" -%}
-      {%- assign has_end = e.Event_End_Date | size | plus: 0 -%}
-      {%- assign is_multiday = false -%}
-      {%- assign is_crossmonth = false -%}
-      {%- if has_end > 0 and end_day != start_day or end_month != start_month -%}
-        {%- assign is_multiday = true -%}
-        {%- if end_month != start_month -%}
-          {%- assign is_crossmonth = true -%}
-        {%- endif -%}
-      {%- endif -%}
 
       <div class="ge-col" data-sort="{{ e.Event_Start_Date }}">
         <div class="ge-card" data-event-id="{{ e.Event_ID }}">
@@ -26,29 +13,7 @@
             {%- else -%}
               <div class="ge-media-fallback">No image available</div>
             {%- endif -%}
-            {%- if is_crossmonth -%}
-            <div class="ge-date-badge ge-date-badge-crossmonth">
-              <span class="ge-badge-date-start">
-                <span class="ge-badge-cm-month">{{ start_month }}</span>
-                <span class="ge-badge-cm-day">{{ start_day }}</span>
-              </span>
-              <span class="ge-badge-cm-divider">&ndash;</span>
-              <span class="ge-badge-date-end">
-                <span class="ge-badge-cm-month">{{ end_month }}</span>
-                <span class="ge-badge-cm-day">{{ end_day }}</span>
-              </span>
-            </div>
-            {%- elsif is_multiday -%}
-            <div class="ge-date-badge">
-              <span class="ge-badge-month">{{ start_month }}</span>
-              <span class="ge-badge-day">{{ start_day }}&ndash;{{ end_day }}</span>
-            </div>
-            {%- else -%}
-            <div class="ge-date-badge">
-              <span class="ge-badge-month">{{ start_month }}</span>
-              <span class="ge-badge-day">{{ start_day }}</span>
-            </div>
-            {%- endif -%}
+            <div class="ge-date-badge" data-start="{{ e.Event_Start_Date }}" data-end="{{ e.Event_End_Date }}"></div>
           </div>
           <div class="ge-body">
             {%- if e.Congregation_Name == "Granger Campus" or e.Congregation_Name == "Elkhart Campus" or e.Congregation_Name == "Online" -%}
@@ -78,17 +43,8 @@
         {%- endif -%}
         <div class="ge-modal-body">
           <h2 class="ge-modal-title">{{ e.Event_Title }}</h2>
-          {%- assign m_has_end = e.Event_End_Date | size | plus: 0 -%}
-          {%- assign m_start_ymd = e.Event_Start_Date | local_date: "%Y-%m-%d" -%}
-          {%- assign m_end_ymd = e.Event_End_Date | local_date: "%Y-%m-%d" -%}
           <div class="ge-modal-meta">
-            {%- if m_has_end > 0 and m_end_ymd != m_start_ymd -%}
-            <span>{{ e.Event_Start_Date | local_date: "%A, %B %-d, %l:%M %p" }} to {{ e.Event_End_Date | local_date: "%A, %B %-d, %l:%M %p" }}</span>
-            {%- elsif m_has_end > 0 -%}
-            <span>{{ e.Event_Start_Date | local_date: "%A, %B %-d" }}, {{ e.Event_Start_Date | local_date: "%-l:%M" }}-{{ e.Event_End_Date | local_date: "%-l:%M %p" }}</span>
-            {%- else -%}
-            <span>{{ e.Event_Start_Date | local_date: "%A, %B %-d, %Y &bull; %l:%M %p" }}</span>
-            {%- endif -%}
+            <span class="ge-modal-datetime" data-start="{{ e.Event_Start_Date }}" data-end="{{ e.Event_End_Date }}"></span>
             {%- if e.Location_Name -%}
               <span class="ge-modal-loc">
                 <span class="ge-campus-dot"></span>
