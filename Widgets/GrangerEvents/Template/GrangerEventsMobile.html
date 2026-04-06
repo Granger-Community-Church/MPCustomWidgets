@@ -1,0 +1,54 @@
+<div class="gem-container">
+  <div class="gem-list" id="gem-list-{{ widgetId }}">
+    {%- for e in DataSet1 -%}
+      {%- assign has_img = e.Image_GUID | size | plus: 0 -%}
+      {%- assign img_url = e.File_URL | append: e.Image_GUID -%}
+
+      <div class="gem-card" data-event-id="{{ e.Event_ID }}" data-sort="{{ e.Event_Start_Date }}">
+        <div class="gem-card-img">
+          {%- if has_img > 0 -%}
+            <img src="{{ img_url }}" alt="{{ e.Event_Title | escape }}" loading="lazy" />
+          {%- else -%}
+            <div class="gem-card-img-fallback"></div>
+          {%- endif -%}
+        </div>
+        <div class="gem-card-body">
+          <h3 class="gem-title">{{ e.Event_Title }}</h3>
+          <div class="gem-card-datetime" data-start="{{ e.Event_Start_Date }}" data-end="{{ e.Event_End_Date }}"></div>
+        </div>
+      </div>
+    {%- endfor -%}
+  </div>
+
+  <!-- Bottom Sheet -->
+  <div class="gem-sheet-backdrop" id="gem-backdrop-{{ widgetId }}"></div>
+  <div class="gem-sheet" id="gem-sheet-{{ widgetId }}">
+    <div class="gem-sheet-handle"></div>
+    <div class="gem-sheet-content" id="gem-sheet-content-{{ widgetId }}">
+      {%- for e in DataSet1 -%}
+        {%- assign has_img = e.Image_GUID | size | plus: 0 -%}
+        {%- assign img_url = e.File_URL | append: e.Image_GUID -%}
+        <div class="gem-detail" id="gem-detail-{{ e.Event_ID }}">
+          {%- if has_img > 0 -%}
+            <img class="gem-detail-img" src="{{ img_url }}" alt="{{ e.Event_Title | escape }}" loading="lazy" />
+          {%- endif -%}
+          <div class="gem-detail-body">
+            <h2 class="gem-detail-title">{{ e.Event_Title }}</h2>
+            <div class="gem-detail-meta">
+              <div class="gem-detail-datetime" data-start="{{ e.Event_Start_Date }}" data-end="{{ e.Event_End_Date }}"></div>
+              {%- if e.Location_Name -%}
+                <div class="gem-detail-loc">{{ e.Location_Name }}</div>
+              {%- endif -%}
+            </div>
+            <div class="gem-detail-desc">
+              {{ e.Additional_Description | default: e.Description | default: "" }}
+            </div>
+            {%- if e.Show_Registration -%}
+              <a class="gem-register" href="/event-details?id={{ e.Event_ID }}" data-event-id="{{ e.Event_ID }}">Register Now</a>
+            {%- endif -%}
+          </div>
+        </div>
+      {%- endfor -%}
+    </div>
+  </div>
+</div>
