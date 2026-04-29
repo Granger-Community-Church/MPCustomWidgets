@@ -239,6 +239,7 @@
       function openModal(eventId) {
         var modal = document.getElementById('ge-modal-' + eventId);
         if (modal) {
+          if (modal.parentNode !== document.body) document.body.appendChild(modal);
           modal.classList.add('ge-open');
           document.body.style.overflow = 'hidden';
           history.replaceState(null, '', '#' + eventId);
