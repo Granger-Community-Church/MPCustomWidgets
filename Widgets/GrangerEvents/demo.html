@@ -213,16 +213,21 @@
       });
       cols.forEach(function(col) { grid.appendChild(col); });
 
-      // Keyword search filter
+      // Keyword search filter — whole-word, multi-token (all tokens must match)
       var searchInput = container.querySelector('.ge-search');
       var noResults = container.querySelector('.ge-no-results');
       if (searchInput) {
         searchInput.addEventListener('input', function() {
           var query = searchInput.value.trim().toLowerCase();
+          var tokens = query ? query.split(/\s+/) : [];
+          var regexes = tokens.map(function(tok) {
+            var escaped = tok.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            return new RegExp('\\b' + escaped + '\\b');
+          });
           var visibleCount = 0;
           cols.forEach(function(col) {
             var haystack = col.getAttribute('data-search') || '';
-            var match = !query || haystack.indexOf(query) !== -1;
+            var match = regexes.length === 0 || regexes.every(function(re) { return re.test(haystack); });
             col.style.display = match ? '' : 'none';
             if (match) visibleCount++;
           });
