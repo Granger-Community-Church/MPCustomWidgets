@@ -1,11 +1,16 @@
 <div class="mp-container mp-mt-4">
+  <div class="ge-toolbar">
+    <input type="search" class="ge-search" id="ge-search-{{ widgetId }}" placeholder="Search events..." aria-label="Search events" autocomplete="off">
+  </div>
+  <div class="ge-no-results" id="ge-no-results-{{ widgetId }}" hidden>No events match your search.</div>
   <div class="ge-grid" id="ge-card-grid-{{ widgetId }}">
     {%- for e in DataSet1 -%}
       {%- assign has_img = e.Image_GUID | size | plus: 0 -%}
       {%- assign img_url = e.File_URL | append: e.Image_GUID -%}
       {%- assign plain_desc = e.Description | strip_html | truncate: 300 -%}
+      {%- capture search_text -%}{{ e.Event_Title }} {{ e.Description }} {{ e.Additional_Description }} {{ e.Location_Name }} {{ e.Program_Name }}{%- endcapture -%}
 
-      <div class="ge-col" data-sort="{{ e.Event_Start_Date }}">
+      <div class="ge-col" data-sort="{{ e.Event_Start_Date }}" data-search="{{ search_text | strip_html | downcase | escape }}">
         <div class="ge-card" data-event-id="{{ e.Event_ID }}">
           <div class="ge-media">
             {%- if has_img > 0 -%}

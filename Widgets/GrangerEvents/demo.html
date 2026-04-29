@@ -213,6 +213,23 @@
       });
       cols.forEach(function(col) { grid.appendChild(col); });
 
+      // Keyword search filter
+      var searchInput = container.querySelector('.ge-search');
+      var noResults = container.querySelector('.ge-no-results');
+      if (searchInput) {
+        searchInput.addEventListener('input', function() {
+          var query = searchInput.value.trim().toLowerCase();
+          var visibleCount = 0;
+          cols.forEach(function(col) {
+            var haystack = col.getAttribute('data-search') || '';
+            var match = !query || haystack.indexOf(query) !== -1;
+            col.style.display = match ? '' : 'none';
+            if (match) visibleCount++;
+          });
+          if (noResults) noResults.hidden = visibleCount > 0;
+        });
+      }
+
       // Modal helpers
       function openModal(eventId) {
         var modal = document.getElementById('ge-modal-' + eventId);
