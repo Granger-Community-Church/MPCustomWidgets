@@ -147,6 +147,23 @@
     var grid = container.querySelector('[id^="ge-card-grid"]');
     if (!grid) return;
 
+    var maxSeriesAttr = container.getAttribute('data-max-series-events');
+    var maxSeries = maxSeriesAttr ? parseInt(maxSeriesAttr, 10) : NaN;
+    if (!isNaN(maxSeries) && maxSeries > 0) {
+      grid.querySelectorAll('.ge-col').forEach(function (col) {
+        var order = parseInt(col.getAttribute('data-sequence-order'), 10);
+        if (!isNaN(order) && order > maxSeries) {
+          var card = col.querySelector('.ge-card');
+          var eventId = card && card.getAttribute('data-event-id');
+          if (eventId) {
+            var modal = document.getElementById('ge-modal-' + eventId);
+            if (modal) modal.remove();
+          }
+          col.remove();
+        }
+      });
+    }
+
     try {
       geFormatDateBadges(container);
       geFormatModalDatetimes(container);
