@@ -3,6 +3,12 @@
 Below you can find the release history of MP Custom Widgets Core code. Please
 
 ## Release History
+- 2026.05.07
+  - GrangerEvents: replaced regex search with Fuse.js
+    - Adds typo tolerance, prefix matching, and church-domain synonym expansion (kid/kids/children → child, men → man, women → woman, youth/teens/teenager(s) → teen)
+    - Stop-word list (`campus`, `campuses`) suppresses noise from common location text so prefix queries like `camp` no longer match every event
+    - Fuse.js auto-loads from jsDelivr at widget init — no consumer page changes required
+    - Added `Widgets/GrangerEvents/compare-search.html` as a side-by-side library survey harness (kept for future re-evaluation)
 - 2025.11.12
   - Added additional CLI for creating cloud versions of widgets automatically
   - Added new data-templateUrl option to load template from a URL
