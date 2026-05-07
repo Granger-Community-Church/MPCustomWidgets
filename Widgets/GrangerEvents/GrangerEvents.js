@@ -20,6 +20,128 @@
     }
   })();
 
+  // --- Fuse.js loader (fuzzy/typo/prefix client search) ---
+  // Templates render via innerHTML so <script> tags inside the Liquid template are inert;
+  // we inject the loader from here. Kicked off immediately so Fuse loads in parallel
+  // with the widget's data fetch and is ready by the time widgetLoaded fires.
+  var fusePromise = (function loadFuse() {
+    if (typeof Fuse !== 'undefined') return Promise.resolve();
+    return new Promise(function (resolve, reject) {
+      var script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.min.js';
+      script.async = true;
+      script.onload = function () { resolve(); };
+      script.onerror = function () {
+        console.error('GrangerEvents: failed to load Fuse.js');
+        reject(new Error('Fuse load failed'));
+      };
+      document.head.appendChild(script);
+    });
+  })();
+
+  // --- Search index helpers ---
+  // Validated via Widgets/GrangerEvents/compare-search.html. Stop words and synonyms
+  // are applied in app code, not via library term-processor hooks (MiniSearch's
+  // processTerm proved unreliable — campus leaked into the index). Pre-strip the
+  // indexed text at source instead.
+  var GE_FIELDS = ['Event_Title', 'Description', 'Additional_Description', 'Location_Name', 'Program_Name'];
+  var GE_STOP_WORDS = new Set(['campus', 'campuses']);
+  var GE_SYNONYMS = {
+    kid: 'child', kids: 'child', children: 'child',
+    men: 'man', women: 'woman',
+    youth: 'teen', teens: 'teen', teenager: 'teen', teenagers: 'teen'
+  };
+
+  function geApplySynonym(term) {
+    var t = String(term).toLowerCase();
+    return Object.prototype.hasOwnProperty.call(GE_SYNONYMS, t) ? GE_SYNONYMS[t] : t;
+  }
+
+  function geExpandQuery(q) {
+    return String(q).toLowerCase().split(/\s+/)
+      .filter(Boolean)
+      .filter(function (t) { return !GE_STOP_WORDS.has(t); })
+      .map(geApplySynonym)
+      .join(' ');
+  }
+
+  var GE_STOP_WORD_RE = (function () {
+    if (GE_STOP_WORDS.size === 0) return null;
+    var alts = Array.from(GE_STOP_WORDS)
+      .map(function (w) { return w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); })
+      .join('|');
+    return new RegExp('\\b(?:' + alts + ')\\b', 'gi');
+  })();
+
+  function geStripStopWords(s) {
+    var str = String(s || '');
+    if (!GE_STOP_WORD_RE) return str;
+    return str.replace(GE_STOP_WORD_RE, ' ').replace(/\s+/g, ' ').trim();
+  }
+
+  function geDebounce(fn, ms) {
+    var t;
+    return function () {
+      var args = arguments, ctx = this;
+      clearTimeout(t);
+      t = setTimeout(function () { fn.apply(ctx, args); }, ms);
+    };
+  }
+
+  function geBindFuseSearch(searchInput, noResults, cols, events) {
+    if (!searchInput) return;
+
+    var sanitized = events.map(function (ev) {
+      var copy = { Event_ID: ev.Event_ID };
+      GE_FIELDS.forEach(function (f) { copy[f] = geStripStopWords(ev[f]); });
+      return copy;
+    });
+    var fuse = new Fuse(sanitized, {
+      keys: GE_FIELDS,
+      threshold: 0.3,
+      ignoreLocation: true,
+      includeScore: true
+    });
+
+    function showAll() {
+      cols.forEach(function (c) { c.style.display = ''; });
+      if (noResults) noResults.hidden = true;
+    }
+
+    function runSearch(rawQuery) {
+      var raw = String(rawQuery || '').trim();
+      if (!raw) return showAll();
+
+      var expanded = geExpandQuery(raw);
+      var tokens = expanded.split(/\s+/).filter(Boolean);
+      if (tokens.length === 0) return showAll();
+
+      var matchIds = null;
+      tokens.forEach(function (tok) {
+        // Stricter score cutoff for short tokens — Fuse's default threshold lets
+        // too many edit-distance neighbors through on 4-char queries.
+        var maxScore = tok.length <= 4 ? 0.2 : 0.3;
+        var ids = new Set(fuse.search(tok)
+          .filter(function (r) { return r.score == null || r.score <= maxScore; })
+          .map(function (r) { return String(r.item.Event_ID); }));
+        if (matchIds === null) matchIds = ids;
+        else matchIds = new Set(Array.from(matchIds).filter(function (x) { return ids.has(x); }));
+      });
+
+      var visibleCount = 0;
+      cols.forEach(function (col) {
+        var card = col.querySelector('.ge-card');
+        var id = card && card.getAttribute('data-event-id');
+        var match = matchIds && id && matchIds.has(String(id));
+        col.style.display = match ? '' : 'none';
+        if (match) visibleCount++;
+      });
+      if (noResults) noResults.hidden = visibleCount > 0;
+    }
+
+    searchInput.addEventListener('input', geDebounce(function () { runSearch(searchInput.value); }, 150));
+  }
+
   // --- Date formatting utilities ---
   // MP API returns naive ISO strings with a misleading 'Z' suffix that actually
   // represent local time. Strip the suffix, re-append 'Z', then format with
@@ -177,27 +299,24 @@
     });
     cols.forEach(function (col) { grid.appendChild(col); });
 
-    // Keyword search filter — whole-word, multi-token (all tokens must match)
+    // Fuzzy search filter — Fuse.js with stop words, synonyms, multi-token AND.
+    // Index is built from the raw event data (DataSet1) on the widgetLoaded event,
+    // filtered to whatever survived series-capping above so the index agrees with the DOM.
     var searchInput = container.querySelector('.ge-search');
     var noResults = container.querySelector('.ge-no-results');
-    if (searchInput) {
-      searchInput.addEventListener('input', function () {
-        var query = searchInput.value.trim().toLowerCase();
-        var tokens = query ? query.split(/\s+/) : [];
-        var regexes = tokens.map(function (tok) {
-          var escaped = tok.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-          return new RegExp('\\b' + escaped + '\\b');
-        });
-        var visibleCount = 0;
-        cols.forEach(function (col) {
-          var haystack = col.getAttribute('data-search') || '';
-          var match = regexes.length === 0 || regexes.every(function (re) { return re.test(haystack); });
-          col.style.display = match ? '' : 'none';
-          if (match) visibleCount++;
-        });
-        if (noResults) noResults.hidden = visibleCount > 0;
-      });
-    }
+    var rawEvents = (e.detail && e.detail.data && e.detail.data.DataSet1) || [];
+    var surviving = new Set(cols.map(function (col) {
+      var card = col.querySelector('.ge-card');
+      return card && card.getAttribute('data-event-id');
+    }).filter(Boolean));
+    var liveEvents = rawEvents.filter(function (ev) { return surviving.has(String(ev.Event_ID)); });
+
+    fusePromise.then(function () {
+      geBindFuseSearch(searchInput, noResults, cols, liveEvents);
+    }).catch(function () {
+      // Fuse failed to load — leave the input inert rather than fall back silently.
+      // The console error from the loader is already logged.
+    });
 
     function openModal(eventId) {
       var modal = document.getElementById('ge-modal-' + eventId);
