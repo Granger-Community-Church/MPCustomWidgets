@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>GrangerEvents — Search Library Comparison Harness</title>
+    <link href="https://cdn.jsdelivr.net/gh/Granger-Community-Church/MP-Widgets-CSS@main/mp-widgets.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/minisearch@7.1.2/dist/umd/index.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fuse.js@7.0.0/dist/fuse.min.js"></script>
+    <style>
+      .harness-panel {
+        background: #f6f7f9;
+        border: 1px solid #d0d4da;
+        border-radius: 8px;
+        padding: 1rem 1.25rem;
+        margin: 1.5rem 0;
+      }
+      .harness-panel h3 { margin: 0 0 0.5rem; font-size: 1rem; }
+      .harness-panel .harness-query {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        margin-bottom: 0.75rem;
+      }
+      .harness-panel .harness-query input {
+        font-size: 1rem;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #c0c5cc;
+        border-radius: 6px;
+      }
+      .harness-radios {
+        border: 0;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+      .harness-radios legend { font-weight: 600; padding: 0; margin-bottom: 0.25rem; }
+      .harness-radios label {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        background: #fff;
+        border: 1px solid #d0d4da;
+        border-radius: 999px;
+        padding: 0.3rem 0.75rem;
+        cursor: pointer;
+      }
+      .harness-radios .counter {
+        font-variant-numeric: tabular-nums;
+        color: #444;
+        font-size: 0.85rem;
+      }
+      .harness-tips { font-size: 0.85rem; color: #555; margin-top: 0.75rem; }
+      .harness-tips code { background: #fff; border: 1px solid #d0d4da; border-radius: 4px; padding: 0 0.3rem; }
+      /* Hide the production .ge-search input so the harness master input is the only one */
+      #GrangerEvents .ge-toolbar { display: none; }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+
+      <h2>GrangerEvents — Search Library Comparison Harness</h2>
+      <p>Type a query once; all three libraries run in parallel and report their hit counts. Pick a radio to drive which library's results show in the card grid below.</p>
+
+      <div class="harness-panel">
+        <label class="harness-query">
+          <span><strong>Test query</strong></span>
+          <input type="search" id="harness-query" placeholder="Loading event data..." autocomplete="off" disabled>
+        </label>
+        <fieldset class="harness-radios">
+          <legend>Show cards from:</legend>
+          <label><input type="radio" name="active-lib" value="mini" checked> MiniSearch <span class="counter" id="counter-mini">—</span></label>
+          <label><input type="radio" name="active-lib" value="fuse"> Fuse.js <span class="counter" id="counter-fuse">—</span></label>
+          <label><input type="radio" name="active-lib" value="regex"> Current regex <span class="counter" id="counter-regex">—</span></label>
+        </fieldset>
+        <details class="harness-tips">
+          <summary>Suggested test queries</summary>
+          <ul>
+            <li><code>bapt</code> — prefix (current regex returns 0)</li>
+            <li><code>baptizm</code> — typo</li>
+            <li><code>kids</code> — synonym (should match Children's Ministry)</li>
+            <li><code>men breakfast</code> — multi-token AND</li>
+            <li><code>baptize my child</code> — noisy / overspecified</li>
+          </ul>
+          <p>Per-query result IDs and timings are logged to the console.</p>
+        </details>
+      </div>
+
+      <div id="GrangerEvents"
+           data-component="CustomWidget"
+           data-sp="api_Custom_GetRegistrationEvents"
+           data-template="/Widgets/GrangerEvents/Template/GrangerEvents.html"
+           data-requireUser="false"
+           data-cache="false"
+           data-debug="true"
+           data-host="grangerchurch"></div>
+
+    </div>
+
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/Granger-Community-Church/MPCustomWidgets@main/dist/js/customWidgetV1.js"></script>
+    <script src="./GrangerEvents.js"></script>
+    <script>
+      (function () {
+        var FIELDS = ['Event_Title', 'Description', 'Additional_Description', 'Location_Name', 'Program_Name'];
+
+        // High-frequency, low-signal words to exclude from index AND query.
+        // "campus" appears in almost every Location_Name ("... - Granger Campus") so
+        // a prefix or fuzzy query for "camp" would otherwise match every event.
+        // Include common pluralizations too — \b boundaries don't span word-internal letters.
+        var STOP_WORDS = new Set(['campus', 'campuses']);
+
+        // Curated synonym map. Keep small — the survey is about whether this is enough.
+        var SYNONYMS = {
+          kid: 'child', kids: 'child', children: 'child',
+          men: 'man', women: 'woman',
+          youth: 'teen', teens: 'teen', teenager: 'teen', teenagers: 'teen'
+        };
+
+        function applySynonym(term) {
+          var t = String(term).toLowerCase();
+          return Object.prototype.hasOwnProperty.call(SYNONYMS, t) ? SYNONYMS[t] : t;
+        }
+
+        function expandQuery(q) {
+          return String(q).toLowerCase().split(/\s+/)
+            .filter(Boolean)
+            .filter(function (t) { return !STOP_WORDS.has(t); })
+            .map(applySynonym)
+            .join(' ');
+        }
+
+        // Build a regex like /\b(campus|granger)\b/gi for stripping stop words from field text.
+        function buildStopWordPattern() {
+          if (STOP_WORDS.size === 0) return null;
+          var alts = [...STOP_WORDS].map(function (w) {
+            return w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          }).join('|');
+          return new RegExp('\\b(?:' + alts + ')\\b', 'gi');
+        }
+        var STOP_WORD_RE = buildStopWordPattern();
+
+        function stripStopWords(s) {
+          var str = String(s || '');
+          if (!STOP_WORD_RE) return str;
+          return str.replace(STOP_WORD_RE, ' ').replace(/\s+/g, ' ').trim();
+        }
+
+        function buildRegexHaystack(ev) {
+          var parts = FIELDS.map(function (f) { return ev[f] || ''; });
+          var joined = parts.join(' ').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').toLowerCase();
+          return stripStopWords(joined);
+        }
+
+        var mini = null;
+        var fuse = null;
+        var cols = [];
+        var noResults = null;
+        var haystacks = new Map(); // Event_ID -> regex haystack
+        var eventsById = new Map(); // Event_ID -> raw event (for diagnostics)
+        var queryInput = document.getElementById('harness-query');
+
+        window.addEventListener('widgetLoaded', function (e) {
+          if (e.detail.widgetId !== 'GrangerEvents') return;
+          // Run after GrangerEvents.js's listener has applied series cap + date sort.
+          setTimeout(function () { initHarness(e); }, 0);
+        });
+
+        function initHarness(e) {
+          var container = document.getElementById('GrangerEvents');
+          var grid = container.querySelector('[id^="ge-card-grid"]');
+          if (!grid) return;
+
+          cols = Array.from(grid.querySelectorAll('.ge-col'));
+          noResults = container.querySelector('.ge-no-results');
+
+          var surviving = new Set(cols.map(function (col) {
+            var card = col.querySelector('.ge-card');
+            return card && card.getAttribute('data-event-id');
+          }).filter(Boolean));
+
+          var rawData = (e.detail.data && e.detail.data.DataSet1) || [];
+          var events = rawData.filter(function (ev) { return surviving.has(String(ev.Event_ID)); });
+          console.log('[harness] indexing ' + events.length + ' events (raw=' + rawData.length + ', cols=' + cols.length + ')');
+
+          // Pre-sanitize event field text once and share with both libraries. We tried relying
+          // on MiniSearch's `processTerm` to discard stop words, but in practice it let "campus"
+          // through (likely a tokenizer-pipeline quirk in v7). Source-level stripping is bulletproof:
+          // neither library can index a stop word it never sees.
+          var sanitizedEvents = events.map(function (ev) {
+            var copy = { Event_ID: ev.Event_ID };
+            FIELDS.forEach(function (f) { copy[f] = stripStopWords(ev[f]); });
+            return copy;
+          });
+
+          // Build MiniSearch — prefix + fuzzy + synonym injection. Stop words already stripped at source.
+          mini = new MiniSearch({
+            fields: FIELDS,
+            storeFields: ['Event_ID'],
+            idField: 'Event_ID',
+            processTerm: function (term) {
+              return applySynonym(String(term).toLowerCase());
+            }
+          });
+          mini.addAll(sanitizedEvents);
+
+          // Build Fuse — typo tolerance via Bitap. Same sanitized data as MiniSearch.
+          fuse = new Fuse(sanitizedEvents, {
+            keys: FIELDS,
+            threshold: 0.3,
+            ignoreLocation: true,
+            includeScore: true // score-filter short queries to suppress fuzzy noise
+          });
+
+          // Build regex haystacks (mirrors what the production data-search attribute holds,
+          // but built from raw data so harness doesn't depend on the rendered DOM)
+          events.forEach(function (ev) {
+            var id = String(ev.Event_ID);
+            haystacks.set(id, buildRegexHaystack(ev));
+            eventsById.set(id, ev);
+          });
+
+          console.log('[harness] STOP_WORDS:', [...STOP_WORDS]);
+          console.log('[harness] SYNONYMS:', SYNONYMS);
+
+          queryInput.disabled = false;
+          queryInput.placeholder = 'Search events...';
+          queryInput.addEventListener('input', runAll);
+          document.querySelectorAll('input[name="active-lib"]').forEach(function (r) {
+            r.addEventListener('change', runAll);
+          });
+
+          // Initial state — empty query, all visible
+          updateCounter('mini', cols.length);
+          updateCounter('fuse', cols.length);
+          updateCounter('regex', cols.length);
+        }
+
+        function runAll() {
+          var raw = queryInput.value.trim();
+          var lib = document.querySelector('input[name="active-lib"]:checked').value;
+
+          var miniIds, fuseIds, regexIds;
+          var miniMs, fuseMs, regexMs;
+
+          if (!raw) {
+            miniIds = fuseIds = regexIds = null; // null = "all visible"
+            miniMs = fuseMs = regexMs = 0;
+          } else {
+            var t0;
+
+            t0 = performance.now();
+            miniIds = searchMini(raw);
+            miniMs = performance.now() - t0;
+
+            t0 = performance.now();
+            fuseIds = searchFuse(raw);
+            fuseMs = performance.now() - t0;
+
+            t0 = performance.now();
+            regexIds = searchRegex(raw);
+            regexMs = performance.now() - t0;
+          }
+
+          updateCounter('mini', miniIds === null ? cols.length : miniIds.size);
+          updateCounter('fuse', fuseIds === null ? cols.length : fuseIds.size);
+          updateCounter('regex', regexIds === null ? cols.length : regexIds.size);
+
+          var activeIds =
+            lib === 'mini' ? miniIds :
+            lib === 'fuse' ? fuseIds :
+            regexIds;
+
+          applyVisibility(activeIds);
+
+          if (raw) {
+            console.groupCollapsed(
+              '[harness] q="' + raw + '"' +
+              ' | mini=' + miniIds.size + ' (' + miniMs.toFixed(2) + 'ms)' +
+              ' | fuse=' + fuseIds.size + ' (' + fuseMs.toFixed(2) + 'ms)' +
+              ' | regex=' + regexIds.size + ' (' + regexMs.toFixed(2) + 'ms)'
+            );
+            console.log('expanded query (post-synonym/stop-word):', expandQuery(raw));
+            logMatches('mini', miniIds, raw);
+            logMatches('fuse', fuseIds, raw);
+            logMatches('regex', regexIds, raw);
+            console.groupEnd();
+          }
+        }
+
+        function tokenizeWords(s) {
+          return String(s || '').toLowerCase().match(/[a-z0-9]+/gi) || [];
+        }
+
+        function logMatches(lib, ids, query) {
+          if (!ids || ids.size === 0) {
+            console.log(lib + ': (no matches)');
+            return;
+          }
+          // For each match, find the actual word(s) in its fields that the query matched.
+          // Classify by HOW the match happened:
+          //   ✓ exact   — query token appears as a complete word in some field
+          //   → prefix  — query token is a prefix of a longer word (e.g. "camp" → "camping")
+          //   ? fuzzy/syn — query doesn't appear exactly or as a prefix; came from fuzzy or synonym map
+          var queryTokens = String(query).toLowerCase().split(/\s+/).filter(Boolean);
+          var exactCount = 0, prefixCount = 0, otherCount = 0;
+          var rows = [];
+          ids.forEach(function (id) {
+            var ev = eventsById.get(id) || {};
+            var tokens = [];
+            FIELDS.forEach(function (f) { tokens = tokens.concat(tokenizeWords(ev[f])); });
+            var unique = Array.from(new Set(tokens));
+
+            // Only count tokens that would survive stop-word stripping — those are what's
+            // actually in the index. Otherwise the diagnostic shows phantom "campus" matches
+            // that aren't real index hits.
+            var indexedTokens = unique.filter(function (t) { return !STOP_WORDS.has(t); });
+
+            var anyExact = queryTokens.some(function (qt) { return indexedTokens.indexOf(qt) !== -1; });
+            var matchingWords = [];
+            queryTokens.forEach(function (qt) {
+              indexedTokens.forEach(function (ut) {
+                if (ut !== qt && ut.indexOf(qt) === 0) matchingWords.push(ut);
+              });
+            });
+            matchingWords = Array.from(new Set(matchingWords));
+
+            var matchType;
+            if (anyExact) { matchType = '✓ exact'; exactCount++; }
+            else if (matchingWords.length > 0) { matchType = '→ prefix'; prefixCount++; }
+            else { matchType = '? fuzzy/syn'; otherCount++; }
+
+            rows.push({
+              Match: matchType,
+              'Why matched': matchingWords.length ? matchingWords.join(', ') : (anyExact ? '(query word)' : '(no obvious word)'),
+              Event_ID: id,
+              Event_Title: ev.Event_Title || '',
+              Location_Name: ev.Location_Name || ''
+            });
+          });
+          rows.sort(function (a, b) {
+            var rank = function (m) {
+              return m.charAt(0) === '✓' ? 0 : (m.charAt(0) === '→' ? 1 : 2);
+            };
+            return rank(a.Match) - rank(b.Match);
+          });
+          console.log(
+            lib + ' matches: ' + ids.size + ' total ' +
+            '(' + exactCount + ' exact, ' + prefixCount + ' prefix, ' + otherCount + ' fuzzy/syn)'
+          );
+          console.table(rows);
+        }
+
+        function searchMini(query) {
+          var expanded = expandQuery(query);
+          var results = mini.search(expanded, {
+            prefix: true,
+            // Length-aware fuzzy: short queries get prefix-only (no fuzzy noise). Typos in
+            // ≤4-char words are rare and indistinguishable from genuine other words.
+            // Per MiniSearch docs, return `false` (not 0) to disable fuzzy for a term.
+            fuzzy: function (term) { return term.length > 4 ? 0.2 : false; },
+            combineWith: 'AND'
+          });
+          return new Set(results.map(function (r) { return String(r.Event_ID); }));
+        }
+
+        function searchFuse(query) {
+          var expanded = expandQuery(query);
+          var tokens = expanded.split(/\s+/).filter(Boolean);
+          if (tokens.length === 0) return new Set();
+          var acc = null;
+          tokens.forEach(function (tok) {
+            // Stricter score cutoff for short tokens — Fuse's default 0.3 threshold lets in
+            // too many edit-distance-1 neighbors for 4-char queries.
+            var maxScore = tok.length <= 4 ? 0.2 : 0.3;
+            var ids = new Set(fuse.search(tok)
+              .filter(function (r) { return r.score == null || r.score <= maxScore; })
+              .map(function (r) { return String(r.item.Event_ID); }));
+            if (acc === null) acc = ids;
+            else acc = new Set([...acc].filter(function (x) { return ids.has(x); }));
+          });
+          return acc || new Set();
+        }
+
+        function searchRegex(query) {
+          // Replicates the production whole-word multi-token regex against the same field set,
+          // but with stop words removed from both haystack (at index time) and query.
+          var tokens = query.toLowerCase().split(/\s+/)
+            .filter(Boolean)
+            .filter(function (t) { return !STOP_WORDS.has(t); });
+          var regexes = tokens.map(function (tok) {
+            var escaped = tok.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            return new RegExp('\\b' + escaped + '\\b');
+          });
+          var ids = new Set();
+          haystacks.forEach(function (haystack, id) {
+            var match = regexes.length === 0 || regexes.every(function (re) { return re.test(haystack); });
+            if (match) ids.add(id);
+          });
+          return ids;
+        }
+
+        function applyVisibility(activeIds) {
+          var visibleCount = 0;
+          cols.forEach(function (col) {
+            if (activeIds === null) {
+              col.style.display = '';
+              visibleCount++;
+              return;
+            }
+            var card = col.querySelector('.ge-card');
+            var id = card && card.getAttribute('data-event-id');
+            var match = id && activeIds.has(String(id));
+            col.style.display = match ? '' : 'none';
+            if (match) visibleCount++;
+          });
+          if (noResults) noResults.hidden = visibleCount > 0;
+        }
+
+        function updateCounter(lib, n) {
+          var el = document.getElementById('counter-' + lib);
+          if (el) el.textContent = '(' + n + ')';
+        }
+      })();
+    </script>
+  </body>
+</html>
